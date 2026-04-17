@@ -1,43 +1,95 @@
-# GPT ShopVN - Free API Gateway
+# GPT ShopVN — Free API Gateway
 
-> **Cổng proxy AI tự lưu trữ · Self-hosted AI Proxy Gateway**
+> **Cổng proxy AI tự lưu trữ trên Replit · Self-hosted AI Proxy Gateway**
 >
-> Remix về tài khoản Replit của bạn — dùng tín dụng AI tích hợp sẵn của Replit, không cần tự nhập API key.
+> Một endpoint thống nhất cho OpenAI, Anthropic Claude, Google Gemini và OpenRouter.
+> Không cần tự nhập API key của bất kỳ nhà cung cấp nào.
 
-[![Phiên bản](https://img.shields.io/badge/phiên_bản-1-6366f1?style=flat-square)](./version.json)
-[![GitHub](https://img.shields.io/badge/GitHub-kimoanh11011998%2FReplitAPI--GPT--ShopVn--blue?style=flat-square&logo=github)](https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-)
+[![Version](https://img.shields.io/badge/version-1.0-6366f1?style=flat-square)](./version.json)
+[![License](https://img.shields.io/badge/license-MIT-10b981?style=flat-square)](./LICENSE)
 [![Demo](https://img.shields.io/badge/Demo-Trực%20tuyến-10b981?style=flat-square)](https://replit-2-api-kimoanh11011998.replit.app)
-[![Giấy phép](https://img.shields.io/badge/giấy_phép-MIT-10b981?style=flat-square)](./LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-GPTShopVN-24292e?style=flat-square&logo=github)](https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-)
 
 ---
 
-## Mục lục
+## Triển khai trong 3 bước
 
-- [Giới thiệu](#giới-thiệu)
-- [Tính năng](#tính-năng)
-- [Bắt đầu nhanh](#bắt-đầu-nhanh)
-- [API Endpoints](#api-endpoints)
-- [Xác thực](#xác-thực)
-- [Định tuyến mô hình](#định-tuyến-mô-hình)
-- [Tool Calling](#tool-calling)
-- [Extended Thinking](#extended-thinking)
-- [Kết nối client](#kết-nối-client)
-- [Fleet Manager — Quản lý nhiều node](#fleet-manager--quản-lý-nhiều-node)
-- [Tự động cập nhật](#tự-động-cập-nhật)
-- [Nhật ký thay đổi](#nhật-ký-thay-đổi)
-- [Giấy phép](#giấy-phép)
+### Bước 1 — Import vào Replit
+
+Trong Replit, tạo Repl mới → chọn **"Import from GitHub"** → dán link sau:
+
+```
+https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-
+```
+
+Hoặc mở hộp chat **Replit Agent** và dán đúng đoạn sau:
+
+---
+
+**AGENT SETUP PROMPT — copy toàn bộ đoạn dưới và dán vào Replit Agent:**
+
+```
+Hãy triển khai dự án AI Gateway từ GitHub này: https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-
+
+Làm theo đúng thứ tự sau:
+
+1. Import source code từ GitHub về dự án hiện tại (clone hoặc import).
+
+2. Cài đặt tất cả dependencies bằng lệnh: pnpm install
+
+3. Tạo Secret (biến môi trường) tên là PROXY_API_KEY với một chuỗi ngẫu nhiên mạnh (ít nhất 20 ký tự, gồm chữ và số). Ghi lại giá trị này cho tôi sau khi tạo xong.
+
+4. Kích hoạt các Replit AI Integrations sau (vào mục Integrations trong sidebar):
+   - OpenAI
+   - Anthropic
+   - Google Gemini
+   - OpenRouter
+
+5. Khởi động server bằng lệnh: pnpm run dev
+
+6. Sau khi server chạy thành công, báo lại:
+   - Giá trị PROXY_API_KEY đã tạo
+   - URL preview đang dùng (dạng https://xxxxx.repl.co)
+
+Lưu ý: Không cần nhập API key của OpenAI, Anthropic, Gemini hay OpenRouter — tất cả được cấp tự động qua Replit AI Integrations.
+```
+
+---
+
+### Bước 2 — Cấu hình qua giao diện Portal
+
+Sau khi Agent báo server đã chạy:
+
+1. Mở tab preview (cửa sổ bên phải trong Replit).
+2. Trong portal, nhấn **"Trợ lý cấu hình"** ở góc trên bên phải.
+3. Làm theo các bước hướng dẫn hiện ra — hoặc sao chép lệnh và dán tiếp vào Agent để tự động hoàn tất.
+4. Nhập `PROXY_API_KEY` vào ô **API Key** ở trang Tổng quan để mở khóa đầy đủ tính năng.
+
+### Bước 3 — Publish để lấy URL cố định
+
+1. Nhấn **Deploy → Publish** trong Replit.
+2. Chờ 1–3 phút để hoàn tất.
+3. Bạn nhận được địa chỉ cố định dạng:
+
+```
+https://[tên-dự-án].replit.app
+```
+
+4. Endpoint đầy đủ để dùng với mọi client:
+
+```
+https://[tên-dự-án].replit.app/v1
+```
+
+> Sau khi Publish, cập nhật Base URL trong portal sang địa chỉ production này.
 
 ---
 
 ## Giới thiệu
 
-**GPT ShopVN - Free API Gateway** là một cổng proxy AI tự lưu trữ chạy trên Replit. Nó thống nhất OpenAI, Anthropic Claude, Google Gemini và OpenRouter thành một điểm truy cập duy nhất tương thích OpenAI, cho phép bất kỳ client nào hỗ trợ định dạng OpenAI (CherryStudio, SillyTavern, OpenWebUI, ...) sử dụng tất cả mô hình mà không cần thay đổi cấu hình.
+**GPT ShopVN — Free API Gateway** là cổng proxy AI tự lưu trữ chạy trên Replit. Nó thống nhất OpenAI, Anthropic Claude, Google Gemini và OpenRouter thành **một điểm truy cập duy nhất tương thích chuẩn OpenAI**, cho phép bất kỳ client nào (CherryStudio, SillyTavern, OpenWebUI, LibreChat…) dùng tất cả mô hình mà không cần thay đổi cấu hình.
 
-> **Không cần tự cung cấp API key** của OpenAI, Anthropic, Gemini hay OpenRouter.
-> Gateway sử dụng **Replit AI Integrations** — tín dụng AI tích hợp sẵn của nền tảng Replit,
-> được cấp tự động cho mỗi tài khoản. Bạn chỉ cần tài khoản Replit là đủ.
-
-Triển khai một click bằng cách paste link GitHub vào Replit Agent. Hỗ trợ cập nhật nóng mà không cần triển khai lại.
+**Không cần tự cung cấp API key** của bất kỳ nhà cung cấp nào. Gateway hoạt động thông qua **Replit AI Integrations** — tín dụng AI tích hợp sẵn của nền tảng, được cấp tự động cho mỗi tài khoản Replit có gói hàng tháng.
 
 ---
 
@@ -45,61 +97,33 @@ Triển khai một click bằng cách paste link GitHub vào Replit Agent. Hỗ 
 
 | Tính năng | Mô tả |
 |-----------|-------|
-| 🔀 Định tuyến đa backend | Tự động định tuyến theo tên mô hình đến nhà cung cấp tương ứng |
-| 📐 Tự động chuyển đổi định dạng | Request/response tự động chuyển đổi giữa OpenAI ↔ Claude ↔ Gemini |
-| 🔧 Tool Calling | Hỗ trợ đầy đủ OpenAI `tools` + `tool_calls`, tự động chuyển đổi cho từng backend |
-| 🧠 Extended Thinking | Hậu tố `-thinking` / `-thinking-visible` để bật chế độ suy nghĩ |
-| ⚡ Streaming (SSE) | Tất cả endpoint đều hỗ trợ SSE streaming |
-| 🔑 Đa phương thức xác thực | Bearer Token / x-api-key / x-goog-api-key / URL query param `?key=` |
-| 🎭 Tương thích SillyTavern | Tự động sửa thứ tự role Claude, thêm user message trống |
-| 🖥️ Giao diện quản trị | Web UI 5 tab: Tổng quan / Thống kê / Mô hình / Nhật ký / Tài liệu |
-| 🛥️ Fleet Manager | Quản lý hàng loạt node con: kiểm tra phiên bản & cập nhật một click |
-| 📦 Cập nhật nóng | Đẩy cập nhật qua file bundle, không cần GitHub |
-
----
-
-## Bắt đầu nhanh
-
-### Bước 1 — Triển khai từ GitHub
-
-Paste link sau vào hộp chat **Replit Agent** và nhờ Agent triển khai:
-
-```
-https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-
-```
-
-Agent sẽ tự động clone source code, cài đặt dependencies và khởi động server.
-
-### Bước 2 — Cấu hình ban đầu
-
-Mở trang portal, nhấn nút **Trình cấu hình** ở góc trên bên phải. Sao chép lệnh được tạo ra và dán vào hộp chat Replit Agent — Agent sẽ tự động:
-- Thiết lập `PROXY_API_KEY` (mật khẩu truy cập gateway của bạn)
-- Kích hoạt **Replit AI Integrations** cho OpenAI, Anthropic, Gemini và OpenRouter
-- Khởi động lại server
-
-> Replit AI Integrations cung cấp API key của tất cả nhà cung cấp tự động — bạn không cần tự đăng ký hay nhập bất kỳ key nào từ OpenAI, Anthropic, Google hay OpenRouter.
-
-### Bước 3 — Publish và sử dụng
-
-Nhấn **Deploy → Publish** trên Replit để phát hành ra môi trường production. Bạn sẽ nhận được địa chỉ dạng `https://your-app.replit.app` — đây là **Base URL** dùng cho tất cả client.
-
-> Demo trực tuyến: **[https://replit-2-api-kimoanh11011998.replit.app](https://replit-2-api-kimoanh11011998.replit.app)**
+| Định tuyến đa backend | Tự động định tuyến theo tên mô hình đến OpenAI, Anthropic, Gemini hoặc OpenRouter |
+| Chuyển đổi định dạng | Request/response tự động chuyển đổi giữa OpenAI ↔ Claude ↔ Gemini |
+| Tool Calling | Hỗ trợ đầy đủ OpenAI `tools` + `tool_calls`, tự động chuyển đổi cho từng backend |
+| Extended Thinking | Hậu tố `-thinking` / `-thinking-visible` để bật chế độ suy nghĩ sâu |
+| Streaming SSE | Tất cả endpoint đều hỗ trợ SSE streaming |
+| Đa phương thức xác thực | Bearer Token / x-api-key / x-goog-api-key / URL query param `?key=` |
+| Tương thích SillyTavern | Tự động sửa thứ tự role Claude, thêm user message trống |
+| Giao diện quản trị | Web UI 5 tab: Tổng quan / Thống kê / Mô hình / Endpoint / Nhật ký |
+| Fleet Manager | Quản lý hàng loạt node con: kiểm tra phiên bản và cập nhật một click |
+| Hạn mức ngân sách | Đặt giới hạn chi phí USD, cảnh báo theo ngưỡng 70% / 90% / 100% |
+| Cập nhật nóng | Đẩy cập nhật qua file bundle, không cần triển khai lại |
 
 ---
 
 ## API Endpoints
 
-Tất cả endpoint đều yêu cầu xác thực (xem phần bên dưới).
+Tất cả endpoint đều yêu cầu xác thực.
 
 | Endpoint | Phương thức | Mô tả |
 |----------|-------------|-------|
-| `/v1/chat/completions` | POST | OpenAI Chat Completions (endpoint chính) |
+| `/v1/chat/completions` | POST | OpenAI Chat Completions — endpoint chính |
 | `/v1/models` | GET | Danh sách tất cả mô hình khả dụng |
 | `/v1/messages` | POST | Anthropic Claude Messages định dạng native |
-| `/v1/models/{model}:generateContent` | POST | Gemini native – non-streaming |
-| `/v1/models/{model}:streamGenerateContent` | POST | Gemini native – SSE streaming |
-| `/v1beta/models/{model}:generateContent` | POST | Alias Gemini native – non-streaming |
-| `/v1beta/models/{model}:streamGenerateContent` | POST | Alias Gemini native – SSE streaming |
+| `/v1/models/{model}:generateContent` | POST | Gemini native — non-streaming |
+| `/v1/models/{model}:streamGenerateContent` | POST | Gemini native — SSE streaming |
+| `/v1beta/models/{model}:generateContent` | POST | Alias Gemini native — non-streaming |
+| `/v1beta/models/{model}:streamGenerateContent` | POST | Alias Gemini native — SSE streaming |
 | `/api/healthz` | GET | Kiểm tra trạng thái hoạt động |
 | `/api/update/version` | GET | Truy vấn phiên bản hiện tại |
 | `/api/update/apply` | POST | Kích hoạt cập nhật nóng |
@@ -108,10 +132,10 @@ Tất cả endpoint đều yêu cầu xác thực (xem phần bên dưới).
 
 ## Xác thực
 
-Hỗ trợ 4 phương thức, chọn một trong bốn:
+Hỗ trợ 4 phương thức, chọn một:
 
 ```bash
-# 1. Bearer Token (khuyến nghị, tương thích tất cả client OpenAI)
+# 1. Bearer Token (khuyến nghị — tương thích tất cả client OpenAI)
 curl https://your-app.replit.app/v1/models \
   -H "Authorization: Bearer YOUR_PROXY_API_KEY"
 
@@ -119,11 +143,11 @@ curl https://your-app.replit.app/v1/models \
 curl https://your-app.replit.app/v1/models \
   -H "x-api-key: YOUR_PROXY_API_KEY"
 
-# 3. Header x-goog-api-key (tương thích client Gemini SDK)
+# 3. Header x-goog-api-key (tương thích Gemini SDK)
 curl https://your-app.replit.app/v1/models \
   -H "x-goog-api-key: YOUR_PROXY_API_KEY"
 
-# 4. URL query param ?key= (phù hợp debug đơn giản)
+# 4. URL query param ?key= (phù hợp debug nhanh)
 curl "https://your-app.replit.app/v1/models?key=YOUR_PROXY_API_KEY"
 ```
 
@@ -131,78 +155,56 @@ curl "https://your-app.replit.app/v1/models?key=YOUR_PROXY_API_KEY"
 
 ---
 
+## Kiểm tra nhanh sau khi deploy
+
+```bash
+curl https://your-app.replit.app/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_PROXY_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Xin chào!"}]
+  }'
+```
+
+Nhận được JSON response với `choices[0].message.content` → gateway đang hoạt động.
+
+---
+
 ## Định tuyến mô hình
 
-Định tuyến hoàn toàn tự động dựa trên tên mô hình — không cần chuyển đổi thủ công.
+Định tuyến tự động hoàn toàn dựa trên tên mô hình — không cần cấu hình thêm.
 
 | Tiền tố / đặc điểm tên mô hình | Định tuyến đến |
-|--------------------------------|---------------|
+|--------------------------------|----------------|
 | `gpt-*`, `o1`, `o3`, `o4-*`, `text-*` | OpenAI |
 | `claude-*` | Anthropic |
 | `gemini-*` | Google Gemini |
 | Tên chứa `/` (ví dụ `provider/model`) | OpenRouter |
 
-### Alias Extended Thinking
+### Extended Thinking
 
-Thêm hậu tố vào tên mô hình bất kỳ có hỗ trợ chức năng suy nghĩ:
+Thêm hậu tố vào tên mô hình bất kỳ hỗ trợ chức năng suy nghĩ sâu:
 
 ```
-claude-opus-4-5-thinking            → Chế độ suy nghĩ, ẩn quá trình
-claude-opus-4-5-thinking-visible    → Chế độ suy nghĩ, hiển thị quá trình
-gemini-2.5-pro-thinking             → Gemini chế độ suy nghĩ
+claude-opus-4-5-thinking              → Chế độ suy nghĩ, ẩn quá trình
+claude-opus-4-5-thinking-visible      → Chế độ suy nghĩ, hiển thị quá trình
+gemini-2.5-pro-thinking               → Gemini chế độ suy nghĩ
 ```
 
 ---
 
 ## Tool Calling
 
-Cổng hỗ trợ đầy đủ định dạng OpenAI `tools` + `tool_calls`, tự động chuyển đổi sang định dạng native của từng backend:
+Hỗ trợ đầy đủ OpenAI `tools` + `tool_calls`, tự động chuyển đổi sang định dạng native từng backend:
 
 | Backend | Quy tắc chuyển đổi |
 |---------|-------------------|
-| **Anthropic** | `tools` → `input_schema`; `tool_choice: "required"` → `{type:"any"}`; `tool_calls` → `tool_use` blocks |
-| **Gemini** | `tools` → `functionDeclarations`; `tool_calls` → `functionCall` parts |
-| **OpenAI / OpenRouter** | Truyền thẳng không thay đổi |
+| Anthropic | `tools` → `input_schema`; `tool_choice: "required"` → `{type:"any"}`; `tool_calls` → `tool_use` blocks |
+| Gemini | `tools` → `functionDeclarations`; `tool_calls` → `functionCall` parts |
+| OpenAI / OpenRouter | Truyền thẳng không thay đổi |
 
 Streaming tool calls hỗ trợ đầy đủ `input_json_delta` chuyển tiếp từng chunk, `finish_reason` ánh xạ đúng thành `"tool_calls"`.
-
-```jsonc
-// Ví dụ request
-{
-  "model": "claude-opus-4-5",
-  "tools": [{
-    "type": "function",
-    "function": {
-      "name": "get_weather",
-      "description": "Lấy thông tin thời tiết hiện tại",
-      "parameters": {
-        "type": "object",
-        "properties": { "city": { "type": "string" } },
-        "required": ["city"]
-      }
-    }
-  }],
-  "messages": [{ "role": "user", "content": "Hôm nay Hà Nội thời tiết thế nào?" }]
-}
-```
-
----
-
-## Extended Thinking
-
-```jsonc
-// Bật chế độ suy nghĩ (ẩn quá trình)
-{ "model": "claude-opus-4-5-thinking", ... }
-
-// Bật chế độ suy nghĩ (hiển thị quá trình)
-{ "model": "claude-opus-4-5-thinking-visible", ... }
-
-// Hoặc truyền trực tiếp trong request body
-{
-  "model": "claude-opus-4-5",
-  "thinking": { "type": "enabled", "budget_tokens": 8000 }
-}
-```
 
 ---
 
@@ -210,66 +212,127 @@ Streaming tool calls hỗ trợ đầy đủ `input_json_delta` chuyển tiếp 
 
 ### CherryStudio
 
-1. Cài đặt → Nhà cung cấp mô hình → Thêm nhà cung cấp → Chọn loại **OpenAI Compatible**
-2. Base URL: địa chỉ production của bạn; API Key: `PROXY_API_KEY`
-3. Nhấn "Kiểm tra" — tất cả mô hình tự động tải về
+1. Cài đặt → Nhà cung cấp mô hình → Thêm nhà cung cấp → Chọn **OpenAI Compatible**
+2. Base URL: địa chỉ production của bạn
+3. API Key: `PROXY_API_KEY` của bạn
+4. Nhấn "Kiểm tra" — tất cả mô hình tự động tải về
 
 ### SillyTavern
 
-1. Bật **Chế độ tương thích SillyTavern** ở tab Tổng quan trong giao diện quản trị
-2. Loại API: **OpenAI**, Base URL: địa chỉ production của bạn
-3. Tên mô hình: ví dụ `claude-opus-4-5`
+1. Vào tab **Tổng quan** trong portal → bật **Chế độ tương thích SillyTavern**
+2. Trong SillyTavern: Loại API = **OpenAI**, Base URL = địa chỉ production
+3. API Key: `PROXY_API_KEY` của bạn
 
-### OpenWebUI / LobeChat / Bất kỳ client tương thích OpenAI
+### OpenWebUI / LibreChat / LobeChat
 
 - Base URL: `https://your-app.replit.app`
-- API Key: `YOUR_PROXY_API_KEY`
+- API Key: `PROXY_API_KEY` của bạn
 - Không cần thay đổi gì thêm
+
+### Python / Node.js SDK
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://your-app.replit.app/v1",
+    api_key="YOUR_PROXY_API_KEY"
+)
+
+response = client.chat.completions.create(
+    model="claude-opus-4-5",
+    messages=[{"role": "user", "content": "Xin chào!"}]
+)
+```
+
+```javascript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://your-app.replit.app/v1",
+  apiKey: "YOUR_PROXY_API_KEY",
+});
+
+const response = await client.chat.completions.create({
+  model: "gemini-2.5-pro",
+  messages: [{ role: "user", content: "Xin chào!" }],
+});
+```
 
 ---
 
 ## Fleet Manager — Quản lý nhiều node
 
-Quản lý nhiều instance GPT ShopVN - Free API Gateway từ tab **Thống kê** trong giao diện quản trị:
+Quản lý nhiều instance GPT ShopVN từ tab **Thống kê** → **Quản lý phiên bản cụm Node**:
 
-- **Kiểm tra phiên bản hàng loạt** — Truy vấn phiên bản hiện tại của tất cả node con trong một click
-- **Cập nhật một click** — Đẩy file bundle mới nhất đến các node con mà không cần triển khai lại
-- **Import/Export** — Sao lưu và khôi phục danh sách node ở định dạng JSON
-- Dữ liệu node lưu trong localStorage của trình duyệt; URL upstream không bao giờ hiển thị trên UI
+- **Kiểm tra phiên bản hàng loạt** — Truy vấn tất cả node con trong một click
+- **Cập nhật một click** — Đẩy bản mới nhất đến các node con mà không cần triển khai lại
+- Dữ liệu node lưu trong localStorage của trình duyệt
 
 ```
 Node chính (This instance)          Node con (Sub-node)
       │                                     │
       ├── GET /api/update/version ─────────→ So sánh phiên bản
       │                                     │
-      └── POST /api/update/apply ──────────→ Tải file bundle
+      └── POST /api/update/apply ──────────→ Tải bundle mới
                                              Giải nén & ghi đè
                                              Tự động khởi động lại
 ```
 
+### Thêm node vĩnh viễn qua biến môi trường
+
+Để node tồn tại sau khi Publish, thêm Secret vào Replit với tên:
+
+```
+FRIEND_PROXY_URL        → node thứ 1
+FRIEND_PROXY_URL_2      → node thứ 2
+FRIEND_PROXY_URL_3      → node thứ 3
+...
+FRIEND_PROXY_URL_20     → node thứ 20
+```
+
+Giá trị là địa chỉ gốc của node con sau khi Publish, ví dụ: `https://my-node.replit.app`
+
 ---
 
-## Tự động cập nhật
+## Cập nhật dự án
 
 ### Cập nhật instance hiện tại
 
-Nhấn vào huy hiệu phiên bản ở góc trên bên phải portal → **Sao chép lệnh** → Dán vào hộp chat Replit Agent. Agent sẽ tự động kéo code mới nhất từ GitHub và khởi động lại server.
+Nhấn vào huy hiệu phiên bản ở góc dưới sidebar trong portal → sao chép lệnh → dán vào Replit Agent. Agent sẽ tự kéo code mới nhất từ GitHub và khởi động lại server.
 
-### Cập nhật hàng loạt node con (Fleet Manager)
+### Cập nhật hàng loạt node con
 
-Thêm địa chỉ các node con vào Fleet Manager, sau đó nhấn **Cập nhật tất cả** để đẩy file bundle mới nhất đến tất cả node cùng một lúc.
+Thêm địa chỉ các node con vào Fleet Manager → nhấn **Cập nhật tất cả**.
+
+---
+
+## Xử lý sự cố
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| Lỗi 401 Unauthorized | API key sai hoặc thiếu | Kiểm tra lại `PROXY_API_KEY` trong Secrets |
+| Tab Mô hình trống | Integration chưa bật | Bật lại các Replit AI Integrations |
+| URL preview không ổn định | Chưa Publish | Deploy lên production |
+| Lỗi 429 Too Many Requests | Vượt rate limit | Chờ vài phút hoặc nâng gói Replit |
+| Model không tồn tại | Sai tên model | Kiểm tra danh sách trong tab Mô hình |
+| Node con không kết nối | Sai URL hoặc key | Kiểm tra URL gốc và `PROXY_API_KEY` của node con |
 
 ---
 
 ## Nhật ký thay đổi
 
-### v.1 — 2026-04-17
-- Bản đầu tiên của GPT ShopVN - Free API Gateway
-- Giao diện Tiếng Việt đầy đủ, hướng dẫn bắt đầu nhanh ở trang Tổng quan
-- Hỗ trợ 4 phương thức auth: Bearer, x-api-key, x-goog-api-key, ?key=
-- OpenAI-compatible `/v1/chat/completions` cho cả 4 provider (OpenAI, Anthropic, Gemini, OpenRouter)
-- Anthropic native `/v1/messages` và Gemini native `/v1/models/:model:generateContent` (+ `/v1beta` alias, streaming)
-- Danh sách Claude đã verify thực tế: 19 model có callback (7 base + 12 thinking variants)
+### v1.0 — 2026-04-17
+
+- Bản phát hành đầu tiên
+- Giao diện Tiếng Việt đầy đủ, portal quản trị 5 tab
+- Hỗ trợ 4 nhà cung cấp AI qua Replit AI Integrations
+- OpenAI-compatible endpoint cho cả 4 provider
+- Anthropic native và Gemini native endpoint
+- Tool Calling, Extended Thinking, Streaming SSE
+- Fleet Manager quản lý hàng loạt node con
+- Hạn mức ngân sách với cảnh báo theo ngưỡng
+- Cập nhật nóng không cần triển khai lại
 
 ---
 
@@ -282,6 +345,6 @@ Xem file [LICENSE](./LICENSE) để biết chi tiết.
 ---
 
 <div align="center">
-  <sub>Powered by Replit · OpenAI · Anthropic · Google Gemini · OpenRouter</sub><br/>
-  <sub>Phát triển bởi GPT ShopVn</sub>
+  <sub>GPTShopVN · OpenAI · Anthropic · Google Gemini · OpenRouter</sub><br/>
+  <sub>Không để chi phí cao thành rào cản sử dụng AI cho người Việt.</sub>
 </div>
