@@ -149,9 +149,9 @@ export default function UpdateBadge({ baseUrl, apiKey: _apiKey }: Props) {
 
               <div className="bg-accent/5 border border-accent/20 rounded-lg p-3.5 mb-3">
                 <div className="text-accent text-[11px] font-semibold mb-2">
-                  📋 Cách cập nhật — Sao chép hướng dẫn → Dán vào hộp chat Replit AI
+                  Cách cập nhật — Sao chép hướng dẫn → Dán vào hộp chat Replit AI
                 </div>
-                <pre className="m-0 p-3 bg-black/40 rounded-md text-[11px] text-text-subtle leading-relaxed whitespace-pre-wrap break-words font-mono max-h-[120px] overflow-y-auto">
+                <pre className="m-0 p-3 bg-black/40 rounded-md text-[11px] text-text-subtle leading-relaxed whitespace-pre-wrap break-words font-mono max-h-[120px] overflow-y-auto custom-scrollbar">
                   {buildAgentPrompt(info.latestVersion ?? "")}
                 </pre>
                 <button
@@ -163,7 +163,7 @@ export default function UpdateBadge({ baseUrl, apiKey: _apiKey }: Props) {
                       : "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
                   )}
                 >
-                  {copied ? <><Check className="w-3.5 h-3.5" /> Đã sao chép vào clipboard!</> : <><Copy className="w-3.5 h-3.5" /> Sao chép hướng dẫn</>}
+                  {copied ? <><Check className="w-3.5 h-3.5" /> Đã sao chép vào clipboard</> : <><Copy className="w-3.5 h-3.5" /> Sao chép hướng dẫn</>}
                 </button>
               </div>
             </>

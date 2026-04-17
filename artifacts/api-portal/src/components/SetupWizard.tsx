@@ -308,17 +308,17 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
   }, [keyInputValue, addUser, addAgent, checkSetupStatus]);
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-6 backdrop-blur-sm">
-      <div className="bg-surface border border-border-strong rounded-[16px] w-full max-w-[540px] h-[min(680px,90vh)] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-bg/80 z-[1000] flex items-center justify-center p-6 backdrop-blur-md">
+      <div className="bg-surface border border-border-strong rounded-[16px] w-full max-w-[540px] h-[min(680px,90vh)] flex flex-col shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-surface-2/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0 shadow-inner">
               <TerminalSquare className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-text text-[15px] m-0">Trợ lý cấu hình</h2>
+              <h2 className="font-bold font-heading text-text text-[15px] m-0">Trợ lý cấu hình</h2>
               <div className="text-[11px] text-success flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                 Đang hoạt động

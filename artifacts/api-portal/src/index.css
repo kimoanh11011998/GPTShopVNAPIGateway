@@ -28,6 +28,7 @@
   --color-muted-foreground: var(--text-muted);
 
   --font-sans: var(--app-font-sans);
+  --font-heading: var(--app-font-heading);
   --font-mono: var(--app-font-mono);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -36,23 +37,26 @@
 }
 
 :root {
-  --bg: #09090b;
-  --surface: #18181b;
-  --surface-2: #27272a;
-  --border: #27272a;
-  --border-strong: #3f3f46;
-  --text: #f4f4f5;
-  --text-muted: #a1a1aa;
-  --text-subtle: #71717a;
-  --accent: #06b6d4;
-  --accent-foreground: #083344;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --bg: #030712; /* Slate 950 */
+  --surface: #0f172a; /* Slate 900 */
+  --surface-2: #1e293b; /* Slate 800 */
+  --border: #1e293b;
+  --border-strong: #334155; /* Slate 700 */
+  --text: #f8fafc; /* Slate 50 */
+  --text-muted: #94a3b8; /* Slate 400 */
+  --text-subtle: #64748b; /* Slate 500 */
+  
+  --accent: #14b8a6; /* Teal 500 */
+  --accent-foreground: #042f2e; /* Teal 900 */
+  
+  --success: #10b981; /* Emerald 500 */
+  --warning: #f59e0b; /* Amber 500 */
+  --danger: #ef4444; /* Red 500 */
 
+  --app-font-heading: 'Plus Jakarta Sans', sans-serif;
   --app-font-sans: 'Inter', -apple-system, sans-serif;
   --app-font-mono: 'JetBrains Mono', Menlo, monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -68,6 +72,13 @@
     font-family: var(--app-font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Subtle radial gradient for depth */
+    background-image: radial-gradient(circle at top center, rgba(20, 184, 166, 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--app-font-heading);
   }
 }
 
@@ -84,4 +95,23 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-strong);
+}
+
+/* Card variants */
+.card-hero {
+  background: linear-gradient(145deg, var(--surface) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(20, 184, 166, 0.1) inset;
+}
+
+.card-standard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.3);
+}
+
+.card-compact {
+  background: rgba(30, 41, 59, 0.5); /* surface-2 with opacity */
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
 }
