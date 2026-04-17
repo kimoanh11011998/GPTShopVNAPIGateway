@@ -390,6 +390,30 @@ function PageStats({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [envPromptCopied, setEnvPromptCopied] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [budgetCap, setBudgetCap] = useState<number | null>(null);
+  const [budgetEditing, setBudgetEditing] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
+  const [budgetSaving, setBudgetSaving] = useState(false);
+
+  useEffect(() => {
+    if (!apiKey) return;
+    fetch(`${baseUrl}/api/settings/budget`, { headers: { Authorization: `Bearer ${apiKey}` } })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d && (typeof d.capUsd === "number" || d.capUsd === null)) setBudgetCap(d.capUsd); })
+      .catch(() => {});
+  }, [apiKey, baseUrl]);
+
+  const saveBudget = (val: number | null) => {
+    setBudgetSaving(true);
+    fetch(`${baseUrl}/api/settings/budget`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ capUsd: val }),
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d) setBudgetCap(d.capUsd); setBudgetEditing(false); })
+      .finally(() => setBudgetSaving(false));
+  };
 
   const ENV_NODE_PROMPT =
     `Hãy thêm một biến môi trường vào dự án Replit hiện tại để đăng ký node con thành ENV node vĩnh viễn (không mất sau khi Publish):\n\n` +
@@ -474,6 +498,78 @@ function PageStats({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       
+      {/* Budget Panel */}
+      {(() => {
+        const used = overallCost;
+        const cap = budgetCap;
+        const ratio = cap && cap > 0 ? Math.min(used / cap, 1) : 0;
+        const pct = cap && cap > 0 ? (used / cap) * 100 : 0;
+        const barColor = !cap ? "bg-border" : pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-emerald-500";
+        const textColor = !cap ? "text-text-muted" : pct >= 90 ? "text-red-400" : pct >= 70 ? "text-amber-400" : "text-emerald-400";
+        return (
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+              <div>
+                <div className="text-[10px] font-bold text-text-subtle tracking-[0.1em] uppercase mb-1">Hạn mức ngân sách</div>
+                <div className="text-sm text-text-muted">
+                  Đã dùng <span className="font-mono font-semibold text-text">${used.toFixed(4)}</span>
+                  {cap !== null && cap > 0 && (
+                    <> / <span className="font-mono font-semibold text-text">${cap.toFixed(2)}</span> <span className={textColor}>({pct.toFixed(1)}%)</span></>
+                  )}
+                  {(cap === null || cap === 0) && <span className="text-text-subtle"> · Chưa đặt giới hạn</span>}
+                </div>
+              </div>
+              {!budgetEditing ? (
+                <button
+                  onClick={() => { setBudgetInput(cap ? String(cap) : ""); setBudgetEditing(true); }}
+                  className="px-3 py-1.5 text-xs font-semibold border border-border hover:border-accent hover:text-accent rounded-md transition"
+                >
+                  {cap ? "Sửa hạn mức" : "Đặt hạn mức"}
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="USD (0 = bỏ giới hạn)"
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                    className="px-2 py-1.5 text-xs font-mono bg-bg border border-border focus:border-accent focus:outline-none rounded-md w-44"
+                    autoFocus
+                  />
+                  <button
+                    disabled={budgetSaving}
+                    onClick={() => {
+                      const v = parseFloat(budgetInput);
+                      if (budgetInput === "" || isNaN(v) || v <= 0) saveBudget(null);
+                      else saveBudget(v);
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold bg-accent text-bg rounded-md disabled:opacity-50"
+                  >Lưu</button>
+                  <button
+                    onClick={() => setBudgetEditing(false)}
+                    className="px-3 py-1.5 text-xs font-semibold border border-border rounded-md"
+                  >Hủy</button>
+                </div>
+              )}
+            </div>
+            <div className="h-2 bg-bg rounded-full overflow-hidden border border-border">
+              <div className={`h-full ${barColor} transition-all`} style={{ width: `${ratio * 100}%` }} />
+            </div>
+            {cap !== null && cap > 0 && pct >= 70 && (
+              <div className={`mt-2 text-xs ${textColor}`}>
+                {pct >= 100
+                  ? `Đã vượt hạn mức ${(used - cap).toFixed(4)} USD`
+                  : pct >= 90
+                  ? `Cảnh báo: sắp chạm hạn mức, còn $${(cap - used).toFixed(4)}`
+                  : `Đã dùng hơn 70% hạn mức, còn $${(cap - used).toFixed(4)}`}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Top KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {[

@@ -12,15 +12,20 @@ const SETTINGS_FILE = resolve(process.cwd(), "server_settings.json");
 
 interface ServerSettings {
   sillyTavernMode: boolean;
+  budgetUsd: number | null;
 }
 
 function loadSettings(): ServerSettings {
   try {
     if (existsSync(SETTINGS_FILE)) {
-      return JSON.parse(readFileSync(SETTINGS_FILE, "utf8")) as ServerSettings;
+      const raw = JSON.parse(readFileSync(SETTINGS_FILE, "utf8")) as Partial<ServerSettings>;
+      return {
+        sillyTavernMode: raw.sillyTavernMode ?? false,
+        budgetUsd: typeof raw.budgetUsd === "number" ? raw.budgetUsd : null,
+      };
     }
   } catch {}
-  return { sillyTavernMode: false };
+  return { sillyTavernMode: false, budgetUsd: null };
 }
 
 function saveSettings(s: ServerSettings): void {
@@ -79,6 +84,31 @@ router.post("/settings/sillytavern", (req: Request, res: Response) => {
   settings.sillyTavernMode = enabled;
   saveSettings(settings);
   res.json({ enabled: settings.sillyTavernMode });
+});
+
+// ---------------------------------------------------------------------------
+// GET /settings/budget — đọc hạn mức USD hiện tại (null = không giới hạn)
+// ---------------------------------------------------------------------------
+
+router.get("/settings/budget", (req: Request, res: Response) => {
+  if (!checkApiKey(req, res)) return;
+  res.json({ capUsd: settings.budgetUsd });
+});
+
+// ---------------------------------------------------------------------------
+// POST /settings/budget — đặt hạn mức USD (gửi null hoặc 0 để bỏ giới hạn)
+// ---------------------------------------------------------------------------
+
+router.post("/settings/budget", (req: Request, res: Response) => {
+  if (!checkApiKey(req, res)) return;
+  const { capUsd } = req.body as { capUsd?: number | null };
+  if (capUsd !== null && (typeof capUsd !== "number" || !isFinite(capUsd) || capUsd < 0)) {
+    res.status(400).json({ error: { message: "capUsd phải là số ≥ 0 hoặc null", type: "invalid_request_error" } });
+    return;
+  }
+  settings.budgetUsd = capUsd === 0 ? null : capUsd;
+  saveSettings(settings);
+  res.json({ capUsd: settings.budgetUsd });
 });
 
 export default router;
