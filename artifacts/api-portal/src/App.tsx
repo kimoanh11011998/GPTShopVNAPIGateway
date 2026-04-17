@@ -281,7 +281,7 @@ export default function App() {
             {tab === "logs" && <PageLogs baseUrl={baseUrl} apiKey={apiKey} />}
 
             <div className="mt-16 text-center text-[11px] text-text-subtle pb-8 font-mono tracking-wider">
-              Powered by Replit AI Integrations · Version 1.0
+              GPTShopVN · Version 1.0
             </div>
           </main>
         </>
