@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Check, Copy } from "lucide-react";
+import { cn } from "../lib/utils";
 
 interface VersionInfo {
   version: string;
@@ -78,162 +80,114 @@ export default function UpdateBadge({ baseUrl, apiKey: _apiKey }: Props) {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        style={{
-          display: "inline-flex", alignItems: "center", gap: "5px",
-          padding: "3px 10px", borderRadius: "12px", fontFamily: "Menlo, monospace",
-          border: `1px solid ${hasUpdate ? "rgba(251,191,36,0.45)" : "rgba(255,255,255,0.1)"}`,
-          background: hasUpdate ? "rgba(251,191,36,0.1)" : "rgba(255,255,255,0.05)",
-          color: hasUpdate ? "#fbbf24" : "#475569",
-          fontSize: "11.5px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
-        }}
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "inline-flex items-center gap-2 px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold cursor-pointer transition-colors border",
+          hasUpdate
+            ? "border-warning/30 bg-warning/10 text-warning hover:bg-warning/20"
+            : "border-border bg-surface-2 text-text-muted hover:bg-border-strong hover:text-text"
+        )}
       >
         {hasUpdate && (
-          <span style={{
-            width: "6px", height: "6px", borderRadius: "50%",
-            background: "#fbbf24", flexShrink: 0, animation: "pulse 2s ease-in-out infinite",
-          }} />
+          <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0 animate-pulse" />
         )}
         v{info.version}
-        {hasUpdate && <span style={{ fontSize: "10px" }}>↑ {info.latestVersion}</span>}
+        {hasUpdate && <span className="text-[10px]">↑ {info.latestVersion}</span>}
       </button>
 
       {open && (
         <div
-          onClick={(e) => { if (e.target === e.currentTarget) { setOpen(false); setCopied(false); } }}
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)",
-            zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "24px", backdropFilter: "blur(6px)",
-          }}
+          className="absolute bottom-12 left-4 w-[400px] z-[2000] bg-surface border border-border shadow-2xl rounded-xl p-5"
         >
-          <div style={{
-            background: "hsl(222,47%,12%)", border: "1px solid rgba(99,102,241,0.25)",
-            borderRadius: "16px", width: "100%", maxWidth: "500px",
-            padding: "24px", boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-              <div>
-                <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: "15px" }}>Thông tin phiên bản AI Gateway</div>
-                <div style={{ color: "#475569", fontSize: "12px", marginTop: "2px" }}>
-                  Phiên bản hiện tại <span style={{ color: "#a5b4fc", fontFamily: "Menlo, monospace" }}>v{info.version}</span>
-                </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="font-semibold text-text text-sm">Thông tin phiên bản AI Gateway</div>
+              <div className="text-text-muted text-xs mt-1">
+                Phiên bản hiện tại <span className="text-accent font-mono">v{info.version}</span>
               </div>
-              <button
-                onClick={() => { setOpen(false); setCopied(false); }}
-                style={{ background: "none", border: "none", color: "#334155", fontSize: "22px", cursor: "pointer" }}
-              >×</button>
             </div>
+            <button
+              onClick={() => { setOpen(false); setCopied(false); }}
+              className="text-text-subtle hover:text-text text-xl leading-none px-2"
+            >×</button>
+          </div>
 
-            {info.releaseNotes && (
-              <div style={{
-                background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.18)",
-                borderRadius: "10px", padding: "12px 14px", marginBottom: "16px",
-              }}>
-                <div style={{ color: "#818cf8", fontSize: "11px", fontWeight: 700, marginBottom: "6px" }}>Ghi chú phiên bản hiện tại</div>
-                <div style={{ color: "#94a3b8", fontSize: "13px", lineHeight: "1.6" }}>{info.releaseNotes}</div>
-              </div>
-            )}
+          {info.releaseNotes && (
+            <div className="bg-accent/5 border border-accent/20 rounded-lg p-3 mb-4">
+              <div className="text-accent text-[11px] font-semibold mb-1.5 uppercase tracking-wider">Ghi chú phiên bản hiện tại</div>
+              <div className="text-text-subtle text-xs leading-relaxed">{info.releaseNotes}</div>
+            </div>
+          )}
 
-            {info.checkError && !hasUpdate && (
-              <div style={{
-                background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
-                borderRadius: "10px", padding: "12px 14px", marginBottom: "16px",
-                color: "#f87171", fontSize: "12.5px",
-              }}>
-                Kiểm tra phiên bản thất bại: {info.checkError}
-              </div>
-            )}
+          {info.checkError && !hasUpdate && (
+            <div className="bg-danger/10 border border-danger/20 rounded-lg p-3 mb-4 text-danger text-xs">
+              Kiểm tra phiên bản thất bại: {info.checkError}
+            </div>
+          )}
 
-            {!hasUpdate && !info.checkError && (
-              <div style={{
-                background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.15)",
-                borderRadius: "10px", padding: "10px 14px", marginBottom: "16px",
-                color: "#86efac", fontSize: "12.5px",
-              }}>
-                ✓ Đây là phiên bản mới nhất
-              </div>
-            )}
+          {!hasUpdate && !info.checkError && (
+            <div className="bg-success/10 border border-success/20 rounded-lg p-2.5 mb-4 text-success text-xs font-medium flex items-center gap-2">
+              <Check className="w-3.5 h-3.5" /> Đây là phiên bản mới nhất
+            </div>
+          )}
 
-            {hasUpdate && (
-              <>
-                <div style={{
-                  background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.25)",
-                  borderRadius: "10px", padding: "14px", marginBottom: "14px",
-                }}>
-                  <div style={{ color: "#fbbf24", fontSize: "12px", fontWeight: 700, marginBottom: "6px" }}>
-                    Phát hiện phiên bản mới v{info.latestVersion}
-                    {info.latestReleaseDate && (
-                      <span style={{ fontWeight: 400, color: "#92400e", marginLeft: "8px" }}>{info.latestReleaseDate}</span>
-                    )}
-                  </div>
-                  {info.latestReleaseNotes && (
-                    <div style={{ color: "#94a3b8", fontSize: "12.5px", lineHeight: "1.6" }}>
-                      {info.latestReleaseNotes}
-                    </div>
+          {hasUpdate && (
+            <>
+              <div className="bg-warning/10 border border-warning/20 rounded-lg p-3.5 mb-3">
+                <div className="text-warning text-xs font-semibold mb-1.5">
+                  Phát hiện phiên bản mới v{info.latestVersion}
+                  {info.latestReleaseDate && (
+                    <span className="font-normal text-warning/70 ml-2">{info.latestReleaseDate}</span>
                   )}
                 </div>
-
-                <div style={{
-                  background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)",
-                  borderRadius: "10px", padding: "14px", marginBottom: "14px",
-                }}>
-                  <div style={{ color: "#818cf8", fontSize: "11px", fontWeight: 700, marginBottom: "10px" }}>
-                    📋 Cách cập nhật — Sao chép hướng dẫn → Dán vào hộp chat Replit AI
+                {info.latestReleaseNotes && (
+                  <div className="text-text-subtle text-[12px] leading-relaxed">
+                    {info.latestReleaseNotes}
                   </div>
-                  <pre style={{
-                    margin: 0, padding: "10px 12px",
-                    background: "rgba(0,0,0,0.35)", borderRadius: "8px",
-                    fontSize: "11.5px", color: "#cbd5e1", lineHeight: "1.6",
-                    whiteSpace: "pre-wrap", wordBreak: "break-word",
-                    fontFamily: "Menlo, Monaco, monospace",
-                    maxHeight: "120px", overflowY: "auto",
-                  }}>
-                    {buildAgentPrompt(info.latestVersion ?? "")}
-                  </pre>
-                  <button
-                    onClick={copyPrompt}
-                    style={{
-                      marginTop: "10px", width: "100%",
-                      padding: "9px 0", borderRadius: "8px",
-                      border: copied ? "1px solid rgba(74,222,128,0.4)" : "1px solid rgba(99,102,241,0.4)",
-                      background: copied ? "rgba(74,222,128,0.1)" : "rgba(99,102,241,0.15)",
-                      color: copied ? "#4ade80" : "#a5b4fc",
-                      fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
-                    }}
-                  >
-                    {copied ? "✓ Đã sao chép vào clipboard!" : "Sao chép hướng dẫn"}
-                  </button>
-                </div>
-              </>
-            )}
+                )}
+              </div>
 
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-              <button
-                onClick={manualCheck}
-                disabled={checking}
-                style={{
-                  padding: "8px 16px", borderRadius: "8px",
-                  border: `1px solid ${checkDone ? "rgba(74,222,128,0.3)" : "rgba(255,255,255,0.1)"}`,
-                  background: checkDone ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.04)",
-                  color: checkDone ? "#4ade80" : checking ? "#334155" : "#475569",
-                  fontSize: "13px", cursor: checking ? "not-allowed" : "pointer",
-                  display: "flex", alignItems: "center", gap: "6px",
-                  transition: "all 0.2s",
-                }}
-              >
-                {checking && <span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⟳</span>}
-                {checking ? "Đang kiểm tra…" : checkDone ? "✓ Hoàn tất" : "Kiểm tra lại"}
-              </button>
-            </div>
+              <div className="bg-accent/5 border border-accent/20 rounded-lg p-3.5 mb-3">
+                <div className="text-accent text-[11px] font-semibold mb-2">
+                  📋 Cách cập nhật — Sao chép hướng dẫn → Dán vào hộp chat Replit AI
+                </div>
+                <pre className="m-0 p-3 bg-black/40 rounded-md text-[11px] text-text-subtle leading-relaxed whitespace-pre-wrap break-words font-mono max-h-[120px] overflow-y-auto">
+                  {buildAgentPrompt(info.latestVersion ?? "")}
+                </pre>
+                <button
+                  onClick={copyPrompt}
+                  className={cn(
+                    "mt-3 w-full py-2 rounded-md font-semibold text-xs transition-colors flex items-center justify-center gap-2 border",
+                    copied
+                      ? "bg-success/10 text-success border-success/30"
+                      : "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
+                  )}
+                >
+                  {copied ? <><Check className="w-3.5 h-3.5" /> Đã sao chép vào clipboard!</> : <><Copy className="w-3.5 h-3.5" /> Sao chép hướng dẫn</>}
+                </button>
+              </div>
+            </>
+          )}
+
+          <div className="flex justify-end">
+            <button
+              onClick={manualCheck}
+              disabled={checking}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-xs flex items-center gap-1.5 transition-colors border",
+                checkDone
+                  ? "bg-success/10 text-success border-success/30"
+                  : checking
+                  ? "bg-transparent text-text-subtle border-border cursor-not-allowed"
+                  : "bg-surface-2 text-text-muted border-border hover:bg-border-strong hover:text-text"
+              )}
+            >
+              {checking && <span className="animate-spin inline-block">⟳</span>}
+              {checking ? "Đang kiểm tra…" : checkDone ? "✓ Hoàn tất" : "Kiểm tra lại"}
+            </button>
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-      `}</style>
     </>
   );
 }

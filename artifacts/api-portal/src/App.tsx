@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
+import { Home, BarChart3, Boxes, Cable, ScrollText, Copy, Check, Plus, Trash2, RefreshCw, Power, Settings, Globe, AlertCircle, PlayCircle, LogOut, Download } from "lucide-react";
 import SetupWizard from "./components/SetupWizard";
 import UpdateBadge from "./components/UpdateBadge";
 import PageLogs from "./components/PageLogs";
 import PageDocs from "./components/PageDocs";
+import { cn } from "./lib/utils";
 
 // ---------------------------------------------------------------------------
 // Model registry
@@ -92,17 +94,6 @@ const OPENROUTER_MODELS: ModelEntry[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const PROVIDER_COLORS: Record<Provider, { bg: string; border: string; dot: string; text: string; label: string }> = {
-  openai: { bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.25)", dot: "#60a5fa", text: "#93c5fd", label: "OpenAI" },
-  anthropic: { bg: "rgba(251,146,60,0.1)", border: "rgba(251,146,60,0.25)", dot: "#fb923c", text: "#fdba74", label: "Anthropic" },
-  gemini: { bg: "rgba(52,211,153,0.08)", border: "rgba(52,211,153,0.25)", dot: "#34d399", text: "#6ee7b7", label: "Google Gemini" },
-  openrouter: { bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)", dot: "#a78bfa", text: "#c4b5fd", label: "OpenRouter" },
-};
-
-// ---------------------------------------------------------------------------
 // Shared sub-components
 // ---------------------------------------------------------------------------
 
@@ -118,121 +109,76 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <button onClick={handleCopy} style={{
-      background: copied ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.07)",
-      border: `1px solid ${copied ? "rgba(74,222,128,0.4)" : "rgba(255,255,255,0.12)"}`,
-      color: copied ? "#4ade80" : "#94a3b8", borderRadius: "6px",
-      padding: "4px 10px", fontSize: "12px", cursor: "pointer",
-      transition: "all 0.15s", whiteSpace: "nowrap", flexShrink: 0,
-    }}>
-      {copied ? "Đã sao chép!" : (label ?? "Sao chép")}
+    <button 
+      onClick={handleCopy} 
+      className={cn(
+        "flex items-center gap-1.5 px-2 py-1 text-xs rounded-md font-medium transition-all shrink-0 border",
+        copied 
+          ? "bg-success/10 text-success border-success/30" 
+          : "bg-surface-2 text-text-muted hover:text-text hover:bg-border-strong border-transparent"
+      )}
+      title={copied ? "Đã sao chép" : "Sao chép"}
+    >
+      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+      {label && <span>{copied ? "Đã sao chép!" : label}</span>}
     </button>
   );
 }
 
 function CodeBlock({ code, copyText }: { code: string; copyText?: string }) {
   return (
-    <div style={{ position: "relative", marginTop: "8px" }}>
-      <pre style={{
-        background: "rgba(0,0,0,0.35)", border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: "8px", padding: "12px 16px", fontFamily: "Menlo, monospace",
-        fontSize: "12.5px", color: "#e2e8f0", overflowX: "auto", margin: 0, paddingRight: "72px",
-        lineHeight: "1.6",
-      }}>{code}</pre>
-      <div style={{ position: "absolute", top: "8px", right: "8px" }}>
+    <div className="relative group mt-2">
+      <pre className="bg-[#0a0a0c] border border-border rounded-lg p-3 pr-12 font-mono text-[12.5px] text-text-subtle overflow-x-auto leading-relaxed custom-scrollbar">
+        {code}
+      </pre>
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <CopyButton text={copyText ?? code} />
       </div>
     </div>
   );
 }
 
-function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function Card({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div style={{
-      background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
-      borderRadius: "12px", padding: "24px", ...style,
-    }}>{children}</div>
+    <div className={cn("bg-surface border border-border rounded-xl p-6", className)}>
+      {children}
+    </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 style={{
-      fontSize: "11px", fontWeight: 700, color: "#64748b", letterSpacing: "0.1em",
-      textTransform: "uppercase", marginBottom: "16px", marginTop: 0,
-    }}>{children}</h2>
+    <h2 className="text-[11px] font-bold text-text-subtle tracking-[0.1em] uppercase mb-4 mt-0">
+      {children}
+    </h2>
   );
 }
 
 function Badge({ variant }: { variant: string }) {
-  const styles: Record<string, { color: string; bg: string; border: string }> = {
-    thinking: { color: "#c084fc", bg: "rgba(192,132,252,0.15)", border: "rgba(192,132,252,0.35)" },
-    "thinking-visible": { color: "#34d399", bg: "rgba(52,211,153,0.12)", border: "rgba(52,211,153,0.3)" },
-    tools: { color: "#fbbf24", bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.3)" },
-    reasoning: { color: "#f472b6", bg: "rgba(244,114,182,0.1)", border: "rgba(244,114,182,0.3)" },
+  const styles: Record<string, string> = {
+    thinking: "text-[#c084fc] bg-[#c084fc]/10 border-[#c084fc]/30",
+    "thinking-visible": "text-[#34d399] bg-[#34d399]/10 border-[#34d399]/30",
+    tools: "text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/30",
+    reasoning: "text-[#f472b6] bg-[#f472b6]/10 border-[#f472b6]/30",
   };
   const labels: Record<string, string> = { thinking: "Thinking", "thinking-visible": "Thinking (visible)", tools: "Tool Calling", reasoning: "Reasoning" };
   const s = styles[variant] ?? styles.tools;
+  
   return (
-    <span style={{
-      fontSize: "10px", fontWeight: 600, color: s.color,
-      background: s.bg, border: `1px solid ${s.border}`,
-      borderRadius: "4px", padding: "1px 5px", flexShrink: 0,
-    }}>{labels[variant] ?? variant}</span>
+    <span className={cn("text-[10px] font-semibold border rounded px-1.5 py-0.5 shrink-0", s)}>
+      {labels[variant] ?? variant}
+    </span>
   );
 }
 
 function MethodBadge({ method }: { method: "GET" | "POST" }) {
   return (
-    <span style={{
-      background: method === "GET" ? "rgba(34,197,94,0.15)" : "rgba(99,102,241,0.2)",
-      color: method === "GET" ? "#4ade80" : "#818cf8",
-      border: `1px solid ${method === "GET" ? "rgba(34,197,94,0.3)" : "rgba(99,102,241,0.3)"}`,
-      borderRadius: "5px", padding: "2px 8px", fontSize: "11px", fontWeight: 700,
-      fontFamily: "Menlo, monospace", flexShrink: 0,
-    }}>{method}</span>
-  );
-}
-
-function ModelGroup({ title, models, provider, expanded, onToggle }: {
-  title: string; models: ModelEntry[]; provider: Provider;
-  expanded: boolean; onToggle: () => void;
-}) {
-  const c = PROVIDER_COLORS[provider];
-  const base = models.filter((m) => !m.badge || (m.badge !== "thinking" && m.badge !== "thinking-visible"));
-  const thinking = models.filter((m) => m.badge === "thinking" || m.badge === "thinking-visible");
-  return (
-    <div style={{ marginBottom: "10px" }}>
-      <button onClick={onToggle} style={{
-        display: "flex", alignItems: "center", gap: "10px", width: "100%",
-        background: c.bg, border: `1px solid ${c.border}`, borderRadius: "8px",
-        padding: "10px 14px", cursor: "pointer", textAlign: "left",
-      }}>
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
-        <span style={{ fontWeight: 600, color: c.text, fontSize: "13px", flex: 1 }}>{title}</span>
-        <span style={{ fontSize: "12px", color: "#475569" }}>{base.length} model · {thinking.length > 0 ? `${thinking.length} thinking` : "–"}</span>
-        <span style={{ fontSize: "11px", color: "#475569", marginLeft: "4px" }}>{expanded ? "▲" : "▼"}</span>
-      </button>
-      {expanded && (
-        <div style={{ marginTop: "5px", display: "flex", flexDirection: "column", gap: "3px" }}>
-          {models.map((m) => (
-            <div key={m.id} style={{
-              display: "flex", alignItems: "center", gap: "10px",
-              background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.05)",
-              borderRadius: "7px", padding: "7px 12px",
-            }}>
-              <code style={{ fontFamily: "Menlo, monospace", fontSize: "12px", color: c.text, flex: 1, wordBreak: "break-all" }}>{m.id}</code>
-              <span style={{ fontSize: "12px", color: "#475569", flexShrink: 0, minWidth: "100px", textAlign: "right" }}>{m.desc}</span>
-              {m.context && (
-                <span style={{ fontSize: "10px", color: "#334155", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "3px", padding: "1px 5px", flexShrink: 0 }}>{m.context}</span>
-              )}
-              {m.badge && <Badge variant={m.badge} />}
-              <CopyButton text={m.id} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <span className={cn(
+      "border rounded px-2 py-0.5 text-[11px] font-bold font-mono shrink-0",
+      method === "GET" ? "bg-success/10 text-success border-success/30" : "bg-accent/10 text-accent border-accent/30"
+    )}>
+      {method}
+    </span>
   );
 }
 
@@ -251,313 +197,105 @@ function PageHome({
   onToggleSTMode: () => void;
 }) {
   return (
-    <>
-      {/* Quick Start Guide */}
-      <Card style={{ marginBottom: "20px", borderColor: "rgba(16,185,129,0.3)", background: "linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(99,102,241,0.04) 100%)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}>
-          <span style={{ fontSize: "18px" }}>🚀</span>
-          <SectionTitle>Hướng dẫn bắt đầu nhanh</SectionTitle>
-          <span style={{ marginLeft: "auto", fontSize: "11px", color: "#334155", background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: "99px", padding: "2px 10px" }}>Dành cho người mới</span>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {/* Step 1 */}
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <div style={{
-              width: "30px", height: "30px", borderRadius: "50%", flexShrink: 0,
-              background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "13px", fontWeight: 700, color: "#818cf8",
-            }}>1</div>
-            <div style={{ flex: 1, paddingTop: "4px" }}>
-              <div style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "13.5px", marginBottom: "4px" }}>
-                Chạy Trợ lý cấu hình
-              </div>
-              <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.6" }}>
-                Nhấn nút <span style={{ color: "#a5b4fc", fontWeight: 600 }}>🚀 Trợ lý cấu hình</span> ở góc trên bên phải.
-                Đặt mật khẩu truy cập, sao chép lệnh được tạo ra rồi dán vào Replit Agent — Agent sẽ tự động cấu hình toàn bộ (AI Integrations + Secrets + khởi động lại).
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginLeft: "22px", borderLeft: "1px dashed rgba(255,255,255,0.06)", paddingLeft: "22px" }} />
-
-          {/* Step 2 */}
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <div style={{
-              width: "30px", height: "30px", borderRadius: "50%", flexShrink: 0,
-              background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "13px", fontWeight: 700, color: "#818cf8",
-            }}>2</div>
-            <div style={{ flex: 1, paddingTop: "4px" }}>
-              <div style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "13.5px", marginBottom: "4px" }}>
-                Publish dự án để lấy địa chỉ chính thức
-              </div>
-              <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.6" }}>
-                Vào <strong style={{ color: "#94a3b8" }}>Deploy → Publish</strong> trên Replit để phát hành dự án.
-                Bạn sẽ nhận được một địa chỉ dạng <code style={{ color: "#a78bfa", fontSize: "11.5px" }}>https://your-app.replit.app</code> — đây là <strong style={{ color: "#94a3b8" }}>Base URL</strong> dùng cho tất cả client.
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginLeft: "22px", borderLeft: "1px dashed rgba(255,255,255,0.06)", paddingLeft: "22px" }} />
-
-          {/* Step 3 */}
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <div style={{
-              width: "30px", height: "30px", borderRadius: "50%", flexShrink: 0,
-              background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "13px", fontWeight: 700, color: "#818cf8",
-            }}>3</div>
-            <div style={{ flex: 1, paddingTop: "4px" }}>
-              <div style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "13.5px", marginBottom: "4px" }}>
-                Kết nối client AI của bạn
-              </div>
-              <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.6" }}>
-                Điền vào client (CherryStudio, SillyTavern, OpenWebUI…):
-              </div>
-              <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "5px" }}>
-                {[
-                  { label: "Base URL", value: "https://your-app.replit.app", color: "#a78bfa" },
-                  { label: "API Key", value: "Mật khẩu bạn đặt ở bước 1", color: "#4ade80" },
-                  { label: "Loại kết nối", value: "OpenAI Compatible", color: "#fbbf24" },
-                ].map((row) => (
-                  <div key={row.label} style={{
-                    display: "flex", alignItems: "center", gap: "10px",
-                    background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: "6px", padding: "5px 10px",
-                  }}>
-                    <span style={{ fontSize: "11px", color: "#475569", width: "90px", flexShrink: 0 }}>{row.label}</span>
-                    <code style={{ fontSize: "11.5px", color: row.color, fontFamily: "Menlo, monospace" }}>{row.value}</code>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginLeft: "22px", borderLeft: "1px dashed rgba(255,255,255,0.06)", paddingLeft: "22px" }} />
-
-          {/* Step 4 */}
-          <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-            <div style={{
-              width: "30px", height: "30px", borderRadius: "50%", flexShrink: 0,
-              background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.4)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "14px", color: "#4ade80",
-            }}>✓</div>
-            <div style={{ flex: 1, paddingTop: "4px" }}>
-              <div style={{ fontWeight: 600, color: "#4ade80", fontSize: "13.5px", marginBottom: "4px" }}>
-                Sẵn sàng sử dụng!
-              </div>
-              <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.6" }}>
-                Nhập API Key vào ô bên dưới để mở khóa trang <strong style={{ color: "#94a3b8" }}>Thống kê</strong> và <strong style={{ color: "#94a3b8" }}>Mô hình</strong>.
-                Xem tab <strong style={{ color: "#94a3b8" }}>Tài liệu</strong> để biết thêm chi tiết về tất cả endpoint.
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Shop Promo Card */}
-      <Card style={{ marginBottom: "20px", borderColor: "rgba(251,191,36,0.35)", background: "linear-gradient(135deg, rgba(251,191,36,0.07) 0%, rgba(245,158,11,0.04) 100%)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-          <span style={{ fontSize: "20px" }}>🛒</span>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: "14px", color: "#fbbf24", letterSpacing: "-0.01em" }}>GPT ShopVn — Bot nâng cấp ChatGPT Plus / Pro</div>
-            <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "2px" }}>Tài khoản chính chủ · Kích hoạt ngay · Hỗ trợ 24/7</div>
-          </div>
-          <span style={{ marginLeft: "auto", fontSize: "11px", color: "#92400e", background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.3)", borderRadius: "99px", padding: "2px 10px", whiteSpace: "nowrap" }}>Ưu đãi hôm nay</span>
-        </div>
-        <div style={{ fontSize: "12.5px", color: "#64748b", lineHeight: "1.7", marginBottom: "14px" }}>
-          Hỗ trợ kích hoạt, gia hạn tài khoản ChatGPT Plus/Pro hàng tháng/năm trên mail chính chủ của bạn với chi phí siêu rẻ - bảo mật - nhanh gọn!
-        </div>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <a
-            href="https://t.me/OdaybanChatGPT_bot"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "7px",
-              padding: "8px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: 600,
-              background: "linear-gradient(135deg, #0088cc, #006aaa)",
-              color: "#fff", textDecoration: "none",
-              boxShadow: "0 2px 8px rgba(0,136,204,0.3)",
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.88 14.03l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.936.556z"/></svg>
-            Mua qua Telegram Bot
-          </a>
-          <a
-            href="https://zalo.me/g/bhqxcer66atne2anqd5b"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "7px",
-              padding: "8px 16px", borderRadius: "8px", fontSize: "13px", fontWeight: 600,
-              background: "linear-gradient(135deg, #0068ff, #0052cc)",
-              color: "#fff", textDecoration: "none",
-              boxShadow: "0 2px 8px rgba(0,104,255,0.3)",
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm.75 17.25h-1.5v-6.75h1.5v6.75zm-.75-8.25a1.125 1.125 0 110-2.25 1.125 1.125 0 010 2.25z"/></svg>
-            Nhóm Zalo hỗ trợ
-          </a>
-        </div>
-      </Card>
-
-      {/* Changelog */}
-      <Card style={{ marginBottom: "20px", borderColor: "rgba(99,102,241,0.25)", background: "rgba(99,102,241,0.05)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-          <span style={{ fontSize: "15px" }}>📋</span>
-          <SectionTitle>Nhật ký cập nhật · Changelog</SectionTitle>
-        </div>
-        {(() => {
-          const releases = [
-            {
-              version: "v.1",
-              date: "2026-04-17",
-              items: [
-                { zh: "", en: "Bản đầu tiên của GPT ShopVN - Free API Gateway · phát hành công khai." },
-                { zh: "", en: "Hỗ trợ 4 phương thức xác thực: Authorization Bearer, x-api-key, x-goog-api-key, ?key= query." },
-                { zh: "", en: "Endpoint OpenAI-compatible /v1/chat/completions tự động định tuyến đến OpenAI, Anthropic, Gemini hoặc OpenRouter." },
-                { zh: "", en: "Endpoint Anthropic native /v1/messages (non-stream + stream) và Gemini native /v1/models/:model:generateContent + :streamGenerateContent (kèm alias /v1beta)." },
-                { zh: "", en: "Danh sách Claude đã verify thực tế: 19 model có callback (7 base Opus/Sonnet/Haiku + 12 thinking variants)." },
-                { zh: "", en: "Sử dụng Replit AI Integrations — không cần cung cấp API key OpenAI/Anthropic/Gemini/OpenRouter của riêng bạn." },
-              ],
-            },
-          ];
-
-          const renderRelease = (release: typeof releases[0]) => (
-            <div key={release.version} style={{ marginBottom: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <span style={{ fontFamily: "Menlo, monospace", fontSize: "13px", fontWeight: 700, color: "#a5b4fc" }}>{release.version}</span>
-                <span style={{ fontSize: "11px", color: "#334155" }}>{release.date}</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px", paddingLeft: "4px" }}>
-                {release.items.map((item, i) => (
-                  <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                    <span style={{ color: "#4f46e5", marginTop: "2px", flexShrink: 0, fontSize: "11px" }}>▸</span>
-                    <div style={{ fontSize: "12.5px", color: "#94a3b8", lineHeight: "1.5" }}>{item.en}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-
-          return (
-            <div style={{ maxHeight: "260px", overflowY: "auto", paddingRight: "4px" }}>
-              {releases.map(renderRelease)}
-            </div>
-          );
-        })()}
-      </Card>
-
-      {/* Feature Cards */}
-      <div style={{ marginBottom: "20px" }}>
-        <SectionTitle>Tính năng cốt lõi</SectionTitle>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px,1fr))", gap: "10px" }}>
-          {[
-            { icon: "🔀", title: "Định tuyến đa backend", desc: "Tự động định tuyến theo tên mô hình đến OpenAI, Anthropic, Gemini hoặc OpenRouter.", color: "#6366f1" },
-            { icon: "📐", title: "Tương thích đa định dạng", desc: "Hỗ trợ đồng thời OpenAI, Claude Messages, Gemini Native; tự động chuyển đổi.", color: "#3b82f6" },
-            { icon: "🔧", title: "Tool Calling", desc: "Hỗ trợ đầy đủ OpenAI tools + tool_calls, tự động chuyển sang định dạng gốc từng backend.", color: "#f59e0b" },
-            { icon: "🧠", title: "Extended Thinking", desc: "Claude, Gemini, o-series đều hỗ trợ hậu tố -thinking và -thinking-visible.", color: "#a855f7" },
-            { icon: "🔑", title: "Đa phương thức xác thực", desc: "Hỗ trợ Bearer Token, header x-goog-api-key, tham số URL ?key=.", color: "#10b981" },
-            { icon: "⚡", title: "Streaming SSE", desc: "Tất cả endpoint đều hỗ trợ SSE streaming, bao gồm endpoint gốc Claude và Gemini.", color: "#f43f5e" },
-          ].map((f) => (
-            <div key={f.title} style={{
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: "10px", padding: "16px", borderTopColor: `${f.color}30`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                <span style={{ fontSize: "18px", width: "32px", height: "32px", background: `${f.color}15`, borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>{f.icon}</span>
-                <span style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "13px" }}>{f.title}</span>
-              </div>
-              <p style={{ margin: 0, fontSize: "12.5px", color: "#475569", lineHeight: "1.6" }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      
       {/* Base URL */}
-      <Card style={{ marginBottom: "14px" }}>
+      <Card>
         <SectionTitle>Base URL</SectionTitle>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <code style={{
-            flex: 1, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "8px", padding: "10px 16px", fontFamily: "Menlo, monospace",
-            fontSize: "14px", color: "#a78bfa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>{displayUrl}</code>
+        <div className="flex items-center gap-3">
+          <code className="flex-1 bg-bg border border-border-strong rounded-lg px-4 py-3 font-mono text-[14px] text-accent overflow-hidden text-ellipsis whitespace-nowrap">
+            {displayUrl}
+          </code>
           <CopyButton text={displayUrl} label="Sao chép URL" />
         </div>
-        <div style={{ marginTop: "10px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-          <span style={{
-            fontSize: "10px", fontWeight: 700, color: "#fbbf24",
-            background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.3)",
-            borderRadius: "4px", padding: "1px 6px", flexShrink: 0, marginTop: "1px",
-          }}>DEV</span>
-          <p style={{ margin: 0, fontSize: "12.5px", color: "#475569", lineHeight: "1.6" }}>
-            Đây là địa chỉ xem trước phát triển. Sau khi <strong style={{ color: "#94a3b8" }}>Publish (phát hành)</strong> dự án, hãy dùng tên miền môi trường sản xuất (<code style={{ color: "#a78bfa", fontSize: "11.5px" }}>https://your-app.replit.app</code>) làm Base URL chính thức.
+        <div className="mt-3 flex gap-2 items-start">
+          <span className="text-[10px] font-bold text-warning bg-warning/10 border border-warning/30 rounded px-1.5 py-0.5 shrink-0 mt-[1px]">DEV</span>
+          <p className="m-0 text-xs text-text-subtle leading-relaxed">
+            Đây là địa chỉ xem trước phát triển. Sau khi <strong className="text-text-muted">Publish (phát hành)</strong> dự án, hãy dùng tên miền môi trường sản xuất (<code className="text-accent text-[11.5px] bg-accent/10 px-1 rounded">https://your-app.replit.app</code>) làm Base URL chính thức.
           </p>
         </div>
       </Card>
 
       {/* API Key + SillyTavern */}
-      <Card>
-        <SectionTitle>Mật khẩu truy cập & Cài đặt</SectionTitle>
-        <div style={{ marginBottom: "14px" }}>
-          <label style={{ fontSize: "12px", color: "#64748b", display: "block", marginBottom: "6px" }}>API Key (PROXY_API_KEY)</label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => { setApiKey(e.target.value); localStorage.setItem("proxy_api_key", e.target.value); }}
-            placeholder="Nhập PROXY_API_KEY của bạn"
-            style={{
-              width: "100%", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "8px", padding: "8px 12px", color: "#e2e8f0",
-              fontFamily: "Menlo, monospace", fontSize: "13px", outline: "none", boxSizing: "border-box",
-            }}
-          />
-        </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "13.5px", marginBottom: "3px" }}>Chế độ tương thích SillyTavern</div>
-            <p style={{ margin: 0, color: "#475569", fontSize: "12.5px", lineHeight: "1.5" }}>
-              Khi bật, tự động thêm user message trống vào Claude để sửa yêu cầu thứ tự vai trò.
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="flex flex-col">
+          <SectionTitle>Mật khẩu truy cập (API Key)</SectionTitle>
+          <div className="flex-1 flex flex-col justify-center">
+            <label className="text-xs text-text-subtle block mb-2">Nhập PROXY_API_KEY của bạn</label>
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => { setApiKey(e.target.value); localStorage.setItem("proxy_api_key", e.target.value); }}
+                placeholder="Ví dụ: my-secret-123"
+                className="flex-1 bg-bg border border-border-strong rounded-lg px-3 py-2 text-text font-mono text-[13px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
+              />
+            </div>
+            {!apiKey && <p className="text-xs text-warning mt-2 mb-0">Cần nhập API Key để xem Thống kê và Mô hình</p>}
           </div>
-          <button
-            onClick={onToggleSTMode}
-            disabled={stLoading || !apiKey}
-            style={{
-              width: "52px", height: "28px", borderRadius: "14px", border: "none",
-              background: sillyTavernMode ? "#6366f1" : "rgba(255,255,255,0.12)",
-              cursor: (stLoading || !apiKey) ? "not-allowed" : "pointer",
-              position: "relative", transition: "background 0.2s", flexShrink: 0,
-              opacity: (stLoading || !apiKey) ? 0.5 : 1,
-            }}
-          >
-            <div style={{
-              width: "22px", height: "22px", borderRadius: "50%", background: "#fff",
-              position: "absolute", top: "3px", left: sillyTavernMode ? "27px" : "3px",
-              transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-            }} />
-          </button>
+        </Card>
+
+        <Card className="flex flex-col">
+          <SectionTitle>Chế độ SillyTavern</SectionTitle>
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <p className="m-0 text-text-subtle text-xs leading-relaxed">
+                  Tự động thêm user message trống vào Claude để sửa lỗi yêu cầu thứ tự vai trò (role order) của một số client nhập vai.
+                </p>
+              </div>
+              <button
+                onClick={onToggleSTMode}
+                disabled={stLoading || !apiKey}
+                className={cn(
+                  "relative w-11 h-6 rounded-full shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg",
+                  sillyTavernMode ? "bg-accent" : "bg-surface-2",
+                  (stLoading || !apiKey) && "opacity-50 cursor-not-allowed"
+                )}
+              >
+                <span className={cn(
+                  "absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transition-all shadow-sm",
+                  sillyTavernMode ? "left-[26px]" : "left-1"
+                )} />
+              </button>
+            </div>
+            <div className={cn(
+              "px-3 py-2 rounded-md text-xs font-medium transition-colors border",
+              sillyTavernMode ? "bg-accent/10 text-accent border-accent/20" : "bg-surface-2 text-text-muted border-transparent"
+            )}>
+              {sillyTavernMode ? 'Đã bật — Tự động thêm {role:"user", content:"Tiếp tục"}' : "Đã tắt — Gửi tin nhắn nguyên gốc"}
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Feature Cards */}
+      <div>
+        <SectionTitle>Tính năng cốt lõi</SectionTitle>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { icon: <Globe className="w-5 h-5 text-accent" />, title: "Định tuyến đa backend", desc: "Tự động định tuyến theo tên mô hình đến OpenAI, Anthropic, Gemini hoặc OpenRouter." },
+            { icon: <Cable className="w-5 h-5 text-accent" />, title: "Tương thích đa định dạng", desc: "Hỗ trợ đồng thời OpenAI, Claude Messages, Gemini Native; tự động chuyển đổi." },
+            { icon: <Settings className="w-5 h-5 text-accent" />, title: "Tool Calling", desc: "Hỗ trợ đầy đủ OpenAI tools + tool_calls, tự động chuyển sang định dạng gốc." },
+            { icon: <PlayCircle className="w-5 h-5 text-accent" />, title: "Streaming SSE", desc: "Tất cả endpoint đều hỗ trợ SSE streaming, bao gồm endpoint gốc Claude và Gemini." },
+          ].map((f, i) => (
+            <div key={i} className="bg-surface border border-border hover:border-accent/30 rounded-xl p-5 transition-colors group">
+              <div className="w-10 h-10 rounded-lg bg-surface-2 group-hover:bg-accent/10 flex items-center justify-center mb-3 transition-colors">
+                {f.icon}
+              </div>
+              <h3 className="font-semibold text-text text-[13px] mb-1.5">{f.title}</h3>
+              <p className="text-[12.5px] text-text-subtle leading-relaxed m-0">{f.desc}</p>
+            </div>
+          ))}
         </div>
-        <div style={{
-          marginTop: "10px", padding: "7px 12px",
-          background: sillyTavernMode ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.03)",
-          border: `1px solid ${sillyTavernMode ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
-          borderRadius: "8px", fontSize: "12px",
-          color: sillyTavernMode ? "#818cf8" : "#475569", fontWeight: 500, transition: "all 0.2s",
-        }}>
-          {sillyTavernMode ? 'Đã bật — Tự động thêm {role:"user", content:"Tiếp tục"} cho mô hình Claude' : "Đã tắt — Gửi tin nhắn nguyên gốc"}
-        </div>
-      </Card>
-    </>
+      </div>
+    </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// PageStats
+// ---------------------------------------------------------------------------
 
 type BackendStat = { calls: number; errors: number; streamingCalls: number; promptTokens: number; completionTokens: number; totalTokens: number; avgDurationMs: number; avgTtftMs: number | null; health: string; url?: string; dynamic?: boolean; enabled?: boolean };
 type ModelStat = { calls: number; promptTokens: number; completionTokens: number };
@@ -642,23 +380,12 @@ function PageStats({
   onToggleBackend, onBatchToggle, onBatchRemove,
   routing, onToggleRouting, modelStats,
 }: {
-  baseUrl: string;
-  apiKey: string;
-  stats: Record<string, BackendStat> | null;
-  statsError: false | "auth" | "server";
-  onRefresh: () => void;
-  addUrl: string;
-  setAddUrl: (u: string) => void;
-  addState: "idle" | "loading" | "ok" | "err";
-  addMsg: string;
-  onAddBackend: (e: React.FormEvent) => void;
-  onRemoveBackend: (label: string) => void;
-  onToggleBackend: (label: string, enabled: boolean) => void;
-  onBatchToggle: (labels: string[], enabled: boolean) => void;
-  onBatchRemove: (labels: string[]) => void;
-  routing: { localEnabled: boolean; localFallback: boolean; fakeStream: boolean };
-  onToggleRouting: (field: "localEnabled" | "localFallback" | "fakeStream", value: boolean) => void;
-  modelStats: Record<string, ModelStat> | null;
+  baseUrl: string; apiKey: string; stats: Record<string, BackendStat> | null; statsError: false | "auth" | "server";
+  onRefresh: () => void; addUrl: string; setAddUrl: (u: string) => void; addState: "idle" | "loading" | "ok" | "err";
+  addMsg: string; onAddBackend: (e: React.FormEvent) => void; onRemoveBackend: (label: string) => void;
+  onToggleBackend: (label: string, enabled: boolean) => void; onBatchToggle: (labels: string[], enabled: boolean) => void;
+  onBatchRemove: (labels: string[]) => void; routing: { localEnabled: boolean; localFallback: boolean; fakeStream: boolean };
+  onToggleRouting: (field: "localEnabled" | "localFallback" | "fakeStream", value: boolean) => void; modelStats: Record<string, ModelStat> | null;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [envPromptCopied, setEnvPromptCopied] = useState(false);
@@ -694,9 +421,16 @@ function PageStats({
       .catch(() => setResetting(false));
   };
 
-  const allSubNodes = stats
-    ? Object.entries(stats).filter(([l]) => l !== "local")
-    : [];
+  if (!apiKey) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
+        <AlertCircle className="w-12 h-12 mb-4 opacity-50" />
+        <p className="text-sm">Vui lòng nhập API Key ở trang Tổng quan để xem thống kê</p>
+      </div>
+    );
+  }
+
+  const allSubNodes = stats ? Object.entries(stats).filter(([l]) => l !== "local") : [];
   const dynamicNodes = allSubNodes.filter(([, s]) => s.dynamic);
 
   const allSelected = allSubNodes.length > 0 && allSubNodes.every(([l]) => selected.has(l));
@@ -733,658 +467,382 @@ function PageStats({
     promptTokens: acc.promptTokens + s.promptTokens,
     completionTokens: acc.completionTokens + s.completionTokens,
     totalTokens: acc.totalTokens + s.totalTokens,
-    totalDuration: acc.totalDuration + (s.avgDurationMs * s.calls),
-    totalTtft: acc.totalTtft + ((s.avgTtftMs ?? 0) * (s.streamingCalls ?? 0)),
-    totalStreamCalls: acc.totalStreamCalls + (s.streamingCalls ?? 0),
-  }), { calls: 0, errors: 0, streamingCalls: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0, totalDuration: 0, totalTtft: 0, totalStreamCalls: 0 }) : null;
+  }), { calls: 0, errors: 0, streamingCalls: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0 }) : { calls: 0, errors: 0, streamingCalls: 0, promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
-  const statCardStyle: React.CSSProperties = {
-    background: "rgba(0,0,0,0.3)",
-    border: "1px solid rgba(255,255,255,0.06)",
-    borderRadius: "12px",
-    padding: "18px 20px",
-  };
-
-  const statLabelStyle: React.CSSProperties = {
-    display: "flex", alignItems: "center", gap: "8px",
-    fontSize: "13px", fontWeight: 600, color: "#94a3b8", marginBottom: "14px",
-  };
-
-  const bigNumStyle: React.CSSProperties = {
-    fontSize: "26px", fontWeight: 700, fontFamily: "'JetBrains Mono', Menlo, monospace",
-    letterSpacing: "-0.02em",
-  };
-
-  const subNumStyle: React.CSSProperties = {
-    fontSize: "12px", color: "#475569", marginTop: "2px",
-  };
+  const overallCost = totalModelCost ?? estimateCostFallback(totals.promptTokens, totals.completionTokens);
 
   return (
-    <>
-      {/* Stats Panel Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "4px", height: "20px", background: "linear-gradient(180deg, #6366f1, #8b5cf6)", borderRadius: "2px" }} />
-          <span style={{ fontSize: "17px", fontWeight: 700, color: "#f1f5f9" }}>Bảng thống kê</span>
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button onClick={onRefresh} style={{
-            padding: "6px 16px", borderRadius: "8px", fontSize: "12px", fontWeight: 600,
-            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
-            color: "#94a3b8", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px",
-          }}>&#8635; Làm mới</button>
-          <button onClick={resetStats} disabled={resetting || !apiKey} style={{
-            padding: "6px 16px", borderRadius: "8px", fontSize: "12px", fontWeight: 600,
-            background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
-            color: "#f87171", cursor: (!apiKey || resetting) ? "not-allowed" : "pointer",
-            opacity: (!apiKey || resetting) ? 0.5 : 1,
-          }}>Đặt lại</button>
-        </div>
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      
+      {/* Top KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { label: "Tổng số gọi", value: fmt(totals.calls) },
+          { label: "Lỗi", value: fmt(totals.errors) },
+          { label: "Tổng Tokens", value: fmt(totals.totalTokens) },
+          { label: "Số Node", value: allSubNodes.length.toString() },
+          { label: "Chi phí ước tính", value: `$${overallCost.toFixed(4)}` },
+          { label: "Gọi streaming", value: fmt(totals.streamingCalls) }
+        ].map((kpi, i) => (
+          <div key={i} className="bg-surface border border-border rounded-xl p-5 flex flex-col justify-center">
+            <div className="text-[10px] font-bold text-text-subtle tracking-[0.1em] uppercase mb-2">{kpi.label}</div>
+            <div className="text-xl md:text-2xl font-mono font-semibold text-text">{kpi.value}</div>
+          </div>
+        ))}
       </div>
 
-      {!apiKey ? (
-        <Card><p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>Vui lòng nhập API Key ở trang Tổng quan trước khi xem thống kê.</p></Card>
-      ) : statsError === "server" ? (
-        <Card><p style={{ margin: 0, fontSize: "13px", color: "#f87171" }}>Server chưa cấu hình PROXY_API_KEY — Hãy chạy trình cấu hình để hoàn tất khởi tạo.</p></Card>
-      ) : statsError === "auth" ? (
-        <Card>
-          <div style={{ fontSize: "13px", color: "#f87171", lineHeight: "1.7" }}>
-            <div style={{ fontWeight: 600, marginBottom: "6px" }}>Xác thực thất bại (API Key không khớp)</div>
-            <div style={{ color: "#94a3b8", fontSize: "12.5px" }}>
-              API Key nhập ở trang Tổng quan phải trùng chính xác với mật khẩu đã cấu hình.
-            </div>
-            <div style={{ color: "#475569", fontSize: "12px", marginTop: "6px" }}>
-              Nếu quên mật khẩu, hãy xem giá trị
-              <code style={{ color: "#a78bfa", fontFamily: "Menlo, monospace", marginLeft: "4px", marginRight: "4px" }}>PROXY_API_KEY</code>
-              trong panel <strong style={{ color: "#94a3b8" }}>&#128274; Secrets</strong> ở thanh bên Replit, hoặc chạy lại trình cấu hình để đổi mật khẩu.
-            </div>
-          </div>
-        </Card>
-      ) : !stats ? (
-        <Card><p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>Đang tải...</p></Card>
-      ) : (
-        <>
-          {/* 6 Summary Cards - 3x2 Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "16px" }}>
-            {/* Thống kê sử dụng */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#128202;</span>
-                <span>Thống kê sử dụng</span>
-              </div>
-              <div style={{ display: "flex", gap: "24px" }}>
-                <div>
-                  <div style={subNumStyle}>Tổng request</div>
-                  <div style={{ ...bigNumStyle, color: "#818cf8" }}>{totals!.calls}</div>
-                </div>
-                <div>
-                  <div style={subNumStyle}>Streaming</div>
-                  <div style={{ ...bigNumStyle, color: "#3b82f6" }}>{totals!.streamingCalls}</div>
-                </div>
-              </div>
-            </div>
+      <div className="flex justify-end">
+        <button
+          onClick={resetStats}
+          disabled={resetting}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-[11px] font-semibold text-text-subtle hover:text-text hover:bg-surface-2 transition-colors disabled:opacity-50"
+        >
+          {resetting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+          Xóa dữ liệu thống kê
+        </button>
+      </div>
 
-            {/* Lượng Token */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#9889;</span>
-                <span style={{ color: "#fbbf24" }}>Lượng Token</span>
-              </div>
-              <div style={{ display: "flex", gap: "24px" }}>
-                <div>
-                  <div style={subNumStyle}>Prompt tokens</div>
-                  <div style={{ ...bigNumStyle, color: "#34d399" }}>{fmt(totals!.promptTokens)}</div>
-                </div>
-                <div>
-                  <div style={subNumStyle}>Completion tokens</div>
-                  <div style={{ ...bigNumStyle, color: "#34d399" }}>{fmt(totals!.completionTokens)}</div>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* Nodes Table */}
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <SectionTitle>Danh sách Node</SectionTitle>
+              <button onClick={onRefresh} className="p-1.5 text-text-subtle hover:text-text rounded-md hover:bg-surface-2 transition-colors border border-transparent hover:border-border">
+                <RefreshCw className="w-4 h-4" />
+              </button>
             </div>
+            
+            {/* Add inline form */}
+            <form onSubmit={onAddBackend} className="flex gap-2 mb-4">
+              <input
+                type="url" value={addUrl} onChange={(e) => setAddUrl(e.target.value)}
+                placeholder="https://node-url.replit.app"
+                className="flex-1 bg-bg border border-border-strong rounded-lg px-3 py-2 text-text font-mono text-[13px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
+              />
+              <button type="submit" disabled={addState === "loading"} className="px-4 py-2 bg-surface-2 hover:bg-border-strong text-text font-medium text-[13px] rounded-lg transition-colors border border-border flex items-center gap-2 shrink-0">
+                <Plus className="w-4 h-4" /> Thêm Node
+              </button>
+            </form>
+            {addState === "ok" && <p className="text-[11.5px] text-success m-0 mb-3">{addMsg}</p>}
+            {addState === "err" && <p className="text-[11.5px] text-danger m-0 mb-3">{addMsg}</p>}
 
-            {/* Chi phí ước tính */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#128176;</span>
-                <span style={{ color: "#f59e0b" }}>Chi phí ước tính</span>
-                {totalModelCost !== null && <span style={{ fontSize: "10px", color: "#475569", marginLeft: "auto" }}>Theo giá từng mô hình</span>}
-              </div>
-              <div>
-                <div style={subNumStyle}>Tổng chi phí</div>
-                <div style={{ ...bigNumStyle, color: "#f59e0b" }}>
-                  ${(totalModelCost ?? estimateCostFallback(totals!.promptTokens, totals!.completionTokens)).toFixed(2)}
-                </div>
-                <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
-                  <span style={{ fontSize: "11px", color: "#475569" }}>Input <span style={{ color: "#f59e0b" }}>${(totalModelInputCost ?? (totals!.promptTokens * DEFAULT_PRICING.input / 1_000_000)).toFixed(2)}</span></span>
-                  <span style={{ fontSize: "11px", color: "#475569" }}>Output <span style={{ color: "#f59e0b" }}>${(totalModelOutputCost ?? (totals!.completionTokens * DEFAULT_PRICING.output / 1_000_000)).toFixed(2)}</span></span>
-                </div>
-              </div>
-            </div>
+            {allSubNodes.length > 0 && (
+              <div className="mb-4 flex items-center gap-3">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected; }}
+                    onChange={toggleSelectAll}
+                    className="w-3.5 h-3.5 accent-accent"
+                  />
+                  <span className="text-[12px] text-text-muted group-hover:text-text transition-colors">
+                    {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                  </span>
+                </label>
 
-            {/* Tỷ lệ thành công */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#9989;</span>
-                <span>Tỷ lệ thành công</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                <div style={{ position: "relative", width: "52px", height: "52px" }}>
-                  <svg width="52" height="52" viewBox="0 0 52 52">
-                    <circle cx="26" cy="26" r="20" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
-                    {totals!.calls > 0 && (
-                      <circle cx="26" cy="26" r="20" fill="none" stroke="#4ade80" strokeWidth="5"
-                        strokeDasharray={`${((totals!.calls - totals!.errors) / totals!.calls) * 125.6} 125.6`}
-                        strokeLinecap="round" transform="rotate(-90 26 26)" />
+                {someSelected && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => { onBatchToggle([...selected], true); setSelected(new Set()); }}
+                      className="px-2 py-1 rounded text-[11px] font-medium bg-success/10 text-success border border-success/30 hover:bg-success/20 transition-colors"
+                    >Bật đã chọn</button>
+                    <button
+                      onClick={() => { onBatchToggle([...selected], false); setSelected(new Set()); }}
+                      className="px-2 py-1 rounded text-[11px] font-medium bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20 transition-colors"
+                    >Tắt đã chọn</button>
+                    {[...selected].some((l) => dynamicNodes.find(([dl]) => dl === l)) && (
+                      <button
+                        onClick={() => {
+                          const dynamicSelected = [...selected].filter((l) => dynamicNodes.find(([dl]) => dl === l));
+                          onBatchRemove(dynamicSelected);
+                          setSelected(new Set());
+                        }}
+                        className="px-2 py-1 rounded text-[11px] font-medium bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20 transition-colors"
+                      >Xóa node động</button>
                     )}
-                  </svg>
-                  <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "#94a3b8" }}>
-                    {totals!.calls > 0 ? `${Math.round(((totals!.calls - totals!.errors) / totals!.calls) * 100)}%` : "--"}
                   </div>
-                </div>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#4ade80" }} />
-                    <span style={{ fontSize: "12px", color: "#94a3b8" }}>Thành công <strong style={{ color: "#e2e8f0" }}>{totals!.calls - totals!.errors}</strong></span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f87171" }} />
-                    <span style={{ fontSize: "12px", color: "#94a3b8" }}>Thất bại <strong style={{ color: "#e2e8f0" }}>{totals!.errors}</strong></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Chỉ số hiệu suất */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#127919;</span>
-                <span style={{ color: "#f43f5e" }}>Chỉ số hiệu suất</span>
-              </div>
-              <div style={{ display: "flex", gap: "24px" }}>
-                <div>
-                  <div style={subNumStyle}>Avg. latency</div>
-                  <div style={{ ...bigNumStyle, fontSize: "20px", color: "#e2e8f0" }}>
-                    {totals!.calls > 0 ? `${Math.round(totals!.totalDuration / totals!.calls)}ms` : "--"}
-                  </div>
-                </div>
-                <div>
-                  <div style={subNumStyle}>Avg. TTFT</div>
-                  <div style={{ ...bigNumStyle, fontSize: "20px", color: "#e2e8f0" }}>
-                    {totals!.totalStreamCalls > 0 ? `${Math.round(totals!.totalTtft / totals!.totalStreamCalls)}ms` : "--"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Chi phí theo mô hình */}
-            <div style={statCardStyle}>
-              <div style={statLabelStyle}>
-                <span style={{ fontSize: "15px" }}>&#128221;</span>
-                <span style={{ color: "#a78bfa" }}>Chi phí theo mô hình</span>
-              </div>
-              {(() => {
-                if (!modelStats || Object.keys(modelStats).length === 0) {
-                  return <div style={{ fontSize: "12px", color: "#475569" }}>Chưa có dữ liệu</div>;
-                }
-                const sorted = Object.entries(modelStats)
-                  .filter(([, ms]) => ms.calls > 0)
-                  .map(([model, ms]) => ({ model, cost: estimateModelCost(model, ms.promptTokens, ms.completionTokens), calls: ms.calls }))
-                  .sort((a, b) => b.cost - a.cost);
-                if (sorted.length === 0) return <div style={{ fontSize: "12px", color: "#475569" }}>Chưa có dữ liệu</div>;
-                return (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "5px", maxHeight: "120px", overflowY: "auto" }}>
-                    {sorted.map(({ model, cost, calls }) => (
-                      <div key={model} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", gap: "8px" }}>
-                        <span style={{ color: "#94a3b8", fontFamily: "Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }} title={model}>{model}</span>
-                        <span style={{ color: "#475569", flexShrink: 0 }}>{calls} lần</span>
-                        <span style={{ color: "#f59e0b", fontWeight: 600, flexShrink: 0 }}>${cost.toFixed(4)}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Per-backend node cards */}
-          <Card style={{ marginBottom: "14px" }}>
-            <SectionTitle>Thống kê theo node</SectionTitle>
-            {Object.entries(stats).length === 0 ? (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <div style={{ fontSize: "40px", marginBottom: "8px", opacity: 0.3 }}>&#128172;</div>
-                <div style={{ color: "#64748b", fontSize: "14px", fontWeight: 600 }}>Chưa có dữ liệu thống kê</div>
-                <div style={{ color: "#475569", fontSize: "12px", marginTop: "4px" }}>Thống kê sẽ tự động ghi nhận sau khi có yêu cầu API</div>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {Object.entries(stats).map(([label, s]) => {
-                  const isEnabled = s.enabled !== false;
-                  const isHealthy = s.health === "healthy";
-                  const cost = estimateCostFallback(s.promptTokens, s.completionTokens);
-                  return (
-                    <div key={label} style={{
-                      background: isEnabled ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.35)",
-                      border: `1px solid ${isEnabled ? "rgba(255,255,255,0.06)" : "rgba(248,113,113,0.15)"}`,
-                      borderRadius: "10px", padding: "14px 16px",
-                      opacity: isEnabled ? 1 : 0.6,
-                    }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
-                        <div style={{
-                          width: "8px", height: "8px", borderRadius: "50%",
-                          background: !isEnabled ? "#64748b" : isHealthy ? "#4ade80" : "#f87171",
-                          boxShadow: (isEnabled && isHealthy) ? "0 0 6px #4ade80" : undefined,
-                        }} />
-                        <span style={{ fontSize: "13px", fontWeight: 700, color: isEnabled ? "#e2e8f0" : "#64748b", fontFamily: "'JetBrains Mono', Menlo, monospace" }}>{label}</span>
-                        {s.dynamic && <span style={{ fontSize: "10px", color: "#a78bfa", background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: "4px", padding: "1px 6px" }}>Động</span>}
-                        {!isEnabled && <span style={{ fontSize: "10px", color: "#f87171", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: "4px", padding: "1px 6px" }}>Đã tắt</span>}
-                        {s.url && <span style={{ fontSize: "11px", color: "#334155", fontFamily: "Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{s.url}</span>}
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "12px" }}>
-                        {[
-                          { label: "Request", value: s.calls.toString(), color: "#818cf8" },
-                          { label: "Streaming", value: (s.streamingCalls ?? 0).toString(), color: "#3b82f6" },
-                          { label: "Lỗi", value: s.errors.toString(), color: s.errors > 0 ? "#f87171" : "#4ade80" },
-                          { label: "Prompt tokens", value: fmt(s.promptTokens), color: "#34d399" },
-                          { label: "Completion tokens", value: fmt(s.completionTokens), color: "#34d399" },
-                          { label: "Avg. latency", value: s.calls > 0 ? `${s.avgDurationMs}ms` : "--", color: "#e2e8f0" },
-                          { label: "TTFT", value: s.avgTtftMs ? `${s.avgTtftMs}ms` : "--", color: "#e2e8f0" },
-                          { label: "Chi phí", value: `$${cost.toFixed(2)}`, color: "#f59e0b" },
-                        ].map((item) => (
-                          <div key={item.label}>
-                            <div style={{ fontSize: "10px", color: "#475569", marginBottom: "2px" }}>{item.label}</div>
-                            <div style={{ fontSize: "14px", fontWeight: 600, color: item.color, fontFamily: "'JetBrains Mono', Menlo, monospace" }}>{item.value}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                )}
               </div>
             )}
-          </Card>
-        </>
-      )}
 
-      {/* Routing Settings */}
-      {apiKey && (
-        <Card style={{ marginBottom: "14px" }}>
-          <SectionTitle>Routing</SectionTitle>
-          <p style={{ margin: "0 0 12px", fontSize: "12px", color: "#475569" }}>Kiểm soát hành vi gọi backend cục bộ (tài khoản chính). Node con luôn được ưu tiên.</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {([
-              { field: "localEnabled" as const, label: "Bật backend cục bộ", desc: "Khi tắt, backend cục bộ hoàn toàn dừng, mọi request chỉ đi qua node con" },
-              { field: "localFallback" as const, label: "Fallback về backend cục bộ", desc: "Khi tắt, kể cả khi tất cả node con ngoại tuyến cũng không gọi backend cục bộ (trả về 503)" },
-              { field: "fakeStream" as const, label: "Fake Streaming", desc: "Khi bật, nếu backend không hỗ trợ hoặc streaming thất bại, sẽ mô phỏng phản hồi đầy đủ thành SSE streaming" },
-            ]).map(({ field, label, desc }) => (
-              <div key={field} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: "8px", padding: "10px 14px",
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#94a3b8" }}>{label}</div>
-                  <div style={{ fontSize: "11px", color: "#475569", marginTop: "2px" }}>{desc}</div>
-                </div>
-                <button
-                  onClick={() => onToggleRouting(field, !routing[field])}
-                  style={{
-                    width: "40px", height: "22px", borderRadius: "11px", border: "none", cursor: "pointer",
-                    background: routing[field] ? "#6366f1" : "rgba(255,255,255,0.1)",
-                    position: "relative", transition: "background 0.2s", flexShrink: 0, marginLeft: "12px",
-                  }}
-                >
-                  <div style={{
-                    width: "16px", height: "16px", borderRadius: "50%", background: "#fff",
-                    position: "absolute", top: "3px",
-                    left: routing[field] ? "21px" : "3px",
-                    transition: "left 0.2s",
-                  }} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+            <div className="overflow-x-auto border border-border rounded-lg bg-bg">
+              <table className="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                  <tr className="border-b border-border bg-surface text-[11px] text-text-subtle uppercase tracking-wider">
+                    <th className="p-3 font-semibold w-8"></th>
+                    <th className="p-3 font-semibold">Node</th>
+                    <th className="p-3 font-semibold text-right">Trạng thái</th>
+                    <th className="p-3 font-semibold text-right">Gọi</th>
+                    <th className="p-3 font-semibold text-right">Lỗi</th>
+                    <th className="p-3 font-semibold text-right">Tốc độ</th>
+                    <th className="p-3 font-semibold text-right w-16"></th>
+                  </tr>
+                </thead>
+                <tbody className="text-[13px] font-mono">
+                  {allSubNodes.length === 0 ? (
+                    <tr><td colSpan={7} className="py-6 text-center text-text-subtle text-xs font-sans">Chưa có node con nào</td></tr>
+                  ) : allSubNodes.map(([label, s]) => (
+                    <tr key={label} className="border-b border-border last:border-0 hover:bg-surface-2 transition-colors">
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(label)}
+                          onChange={() => toggleSelect(label)}
+                          className="w-3.5 h-3.5 accent-accent"
+                        />
+                      </td>
+                      <td className="p-3 text-text-muted flex items-center gap-2">
+                        <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.enabled !== false ? (s.health === "healthy" ? "bg-success" : "bg-danger") : "bg-text-subtle")} />
+                        <span className="truncate max-w-[200px]">{s.url ?? label}</span>
+                        {!s.dynamic && <span className="text-[10px] bg-surface-2 px-1.5 py-0.5 rounded border border-border text-text-subtle shrink-0">ENV</span>}
+                      </td>
+                      <td className="p-3 text-right font-sans">
+                        <button
+                          onClick={() => onToggleBackend(label, !(s.enabled !== false))}
+                          className={cn("text-[11px] font-medium hover:underline", s.enabled !== false ? "text-success" : "text-text-subtle")}
+                        >
+                          {s.enabled !== false ? "Đang bật" : "Đã tắt"}
+                        </button>
+                      </td>
+                      <td className="p-3 text-right text-text-subtle">{s.calls}</td>
+                      <td className="p-3 text-right text-danger">{s.errors > 0 ? s.errors : "-"}</td>
+                      <td className="p-3 text-right text-text-subtle">{s.avgDurationMs}ms</td>
+                      <td className="p-3 text-right">
+                        {s.dynamic && (
+                          <button
+                            onClick={() => onRemoveBackend(label)}
+                            className="text-danger/70 hover:text-danger p-1 rounded hover:bg-danger/10 transition-colors inline-flex"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-      {/* Add Node */}
-      <Card>
-        <SectionTitle>Thêm node</SectionTitle>
-        <p style={{ margin: "0 0 12px", fontSize: "12.5px", color: "#475569" }}>Có hiệu lực ngay, không cần khởi động lại hay phát hành lại. Tự động cân bằng tải giữa các node.</p>
-
-        {!apiKey ? (
-          <p style={{ margin: 0, fontSize: "13px", color: "#475569" }}>Vui lòng nhập API Key ở trang Tổng quan trước khi thao tác.</p>
-        ) : (
-          <>
-            <form onSubmit={onAddBackend} style={{ display: "flex", gap: "8px" }}>
-              <input
-                type="url"
-                value={addUrl}
-                onChange={(e) => setAddUrl(e.target.value)}
-                placeholder="https://friend-proxy.replit.app"
-                style={{
-                  flex: 1, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "8px", padding: "8px 12px", color: "#e2e8f0",
-                  fontFamily: "Menlo, monospace", fontSize: "13px", outline: "none",
-                }}
-              />
-              <button type="submit" disabled={addState === "loading"} style={{
-                background: addState === "loading" ? "rgba(99,102,241,0.4)" : "rgba(99,102,241,0.7)",
-                border: "1px solid rgba(99,102,241,0.6)", color: "#e0e7ff",
-                borderRadius: "8px", padding: "8px 18px", fontSize: "13px",
-                fontWeight: 600, cursor: addState === "loading" ? "not-allowed" : "pointer",
-                flexShrink: 0,
-              }}>{addState === "loading" ? "Đang thêm…" : "Thêm node"}</button>
-            </form>
-
-            {/* ENV node via Replit Agent */}
-            <div style={{ marginTop: "14px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "14px" }}>
-              <div style={{ fontSize: "12.5px", color: "#94a3b8", fontWeight: 600, marginBottom: "6px" }}>
-                Thêm qua biến môi trường (node vĩnh viễn)
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#475569", lineHeight: "1.5", marginBottom: "8px" }}>
+            <div className="mt-6 pt-4 border-t border-border">
+              <div className="text-[12.5px] text-text font-semibold mb-2">Thêm qua biến môi trường (node vĩnh viễn)</div>
+              <div className="text-[11.5px] text-text-subtle leading-relaxed mb-3">
                 ENV node được lưu vào Secrets, không mất sau khi Publish. Gửi nội dung bên dưới cho Replit Agent để tự động hoàn tất cấu hình.
               </div>
-              {/* Copyable prompt block */}
-              <div
-                style={{
-                  background: "rgba(0,0,0,0.35)",
-                  border: "1px solid rgba(99,102,241,0.3)",
-                  borderRadius: "8px",
-                  padding: "10px 12px",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                }}
-              >
-                <span
-                  style={{
-                    flex: 1,
-                    color: "#a5b4fc",
-                    fontSize: "12px",
-                    fontFamily: "Menlo, Consolas, monospace",
-                    lineHeight: "1.6",
-                    whiteSpace: "pre-wrap",
-                    userSelect: "all",
-                    wordBreak: "break-all",
-                  }}
-                >
+              <div className="bg-[#0a0a0c] border border-border-strong rounded-lg p-3 flex items-start gap-3 group">
+                <span className="flex-1 text-accent/80 text-[11px] font-mono leading-relaxed whitespace-pre-wrap select-all break-all h-20 overflow-y-auto custom-scrollbar pr-2">
                   {ENV_NODE_PROMPT}
                 </span>
                 <button
                   onClick={copyEnvPrompt}
-                  title="Sao chép"
-                  style={{
-                    flexShrink: 0,
-                    background: envPromptCopied ? "rgba(74,222,128,0.12)" : "rgba(99,102,241,0.1)",
-                    border: `1px solid ${envPromptCopied ? "rgba(74,222,128,0.4)" : "rgba(99,102,241,0.25)"}`,
-                    borderRadius: "6px",
-                    padding: "4px 10px",
-                    color: envPromptCopied ? "#4ade80" : "#a78bfa",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    whiteSpace: "nowrap",
-                  }}
+                  className={cn(
+                    "shrink-0 px-2 py-1.5 rounded border text-[11px] font-semibold transition-all",
+                    envPromptCopied 
+                      ? "bg-success/10 text-success border-success/30" 
+                      : "bg-surface-2 text-text hover:bg-border-strong border-border-strong"
+                  )}
                 >
                   {envPromptCopied ? "✓ Đã sao chép" : "📋 Sao chép"}
                 </button>
               </div>
             </div>
-            {(() => {
-              const raw = addUrl.trim();
-              const normed = normalizeBackendUrl(raw);
-              return raw && normed !== raw.replace(/\/+$/, "") ? (
-                <p style={{ margin: "6px 0 0", fontSize: "11.5px", color: "#94a3b8" }}>
-                  Sẽ lưu là: <code style={{ color: "#a78bfa", fontFamily: "Menlo, monospace" }}>{normed}</code>
-                </p>
-              ) : null;
-            })()}
-            {addState === "ok" && <p style={{ margin: "8px 0 0", fontSize: "12px", color: "#4ade80" }}>{addMsg}</p>}
-            {addState === "err" && <p style={{ margin: "8px 0 0", fontSize: "12px", color: "#f87171" }}>{addMsg}</p>}
+          </Card>
+          
+          {/* FleetManager is a sub-component tracking instances, keep it clean */}
+          <FleetManager />
+        </div>
 
-            {allSubNodes.length > 0 && (
-              <div style={{ marginTop: "14px" }}>
-                {/* 标题行 + 全选 + 批量操作 */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
-                  {/* 全选复选框 */}
-                  <label style={{ display: "flex", alignItems: "center", gap: "5px", cursor: "pointer", userSelect: "none" }}>
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      ref={(el) => { if (el) el.indeterminate = !allSelected && someSelected; }}
-                      onChange={toggleSelectAll}
-                      style={{ accentColor: "#818cf8", width: "14px", height: "14px", cursor: "pointer" }}
-                    />
-                    <span style={{ fontSize: "11px", color: "#475569" }}>
-                      {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
-                      {someSelected && !allSelected ? `(Đã chọn ${selected.size} / ${allSubNodes.length})` : `(Tổng ${allSubNodes.length} node)`}
-                    </span>
-                  </label>
-
-                  {/* 批量操作按钮（有选中时显示） */}
-                  {someSelected && (
-                    <>
-                      <button
-                        onClick={() => { onBatchToggle([...selected], true); setSelected(new Set()); }}
-                        style={{ padding: "2px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.08)", color: "#4ade80", cursor: "pointer" }}
-                      >Bật đã chọn</button>
-                      <button
-                        onClick={() => { onBatchToggle([...selected], false); setSelected(new Set()); }}
-                        style={{ padding: "2px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(251,191,36,0.3)", background: "rgba(251,191,36,0.08)", color: "#fbbf24", cursor: "pointer" }}
-                      >Tắt đã chọn</button>
-                      {/* Chỉ xóa node động */}
-                      {[...selected].some((l) => dynamicNodes.find(([dl]) => dl === l)) && (
-                        <button
-                          onClick={() => {
-                            const dynamicSelected = [...selected].filter((l) => dynamicNodes.find(([dl]) => dl === l));
-                            onBatchRemove(dynamicSelected);
-                            setSelected(new Set());
-                          }}
-                          style={{ padding: "2px 10px", borderRadius: "5px", fontSize: "11px", border: "1px solid rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.08)", color: "#f87171", cursor: "pointer" }}
-                        >Xóa node động</button>
-                      )}
-                    </>
-                  )}
+        <div className="flex flex-col gap-6">
+          {/* Routing Settings */}
+          <Card>
+            <SectionTitle>Routing</SectionTitle>
+            <div className="flex flex-col gap-3">
+              {[
+                { field: "localEnabled" as const, label: "Bật backend cục bộ", desc: "Khi tắt, backend cục bộ hoàn toàn dừng, mọi request chỉ đi qua node con" },
+                { field: "localFallback" as const, label: "Fallback về backend cục bộ", desc: "Khi tắt, kể cả khi tất cả node con ngoại tuyến cũng không gọi backend cục bộ" },
+                { field: "fakeStream" as const, label: "Fake Streaming", desc: "Mô phỏng SSE streaming nếu backend không hỗ trợ" },
+              ].map(({ field, label, desc }) => (
+                <div key={field} className="flex items-center justify-between bg-bg border border-border rounded-lg p-3">
+                  <div className="pr-4">
+                    <div className="text-[13px] font-semibold text-text">{label}</div>
+                    <div className="text-[11px] text-text-subtle mt-0.5 leading-relaxed">{desc}</div>
+                  </div>
+                  <button
+                    onClick={() => onToggleRouting(field, !routing[field])}
+                    className={cn(
+                      "relative w-10 h-5.5 rounded-full shrink-0 transition-colors",
+                      routing[field] ? "bg-accent" : "bg-surface-2"
+                    )}
+                  >
+                    <span className={cn(
+                      "absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full transition-all shadow-sm",
+                      routing[field] ? "left-[21px]" : "left-1"
+                    )} />
+                  </button>
                 </div>
+              ))}
+            </div>
+          </Card>
 
-                {/* 节点列表 */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                  {allSubNodes.map(([label, s]) => {
-                    const isEnabled = s.enabled !== false;
-                    const isChecked = selected.has(label);
-                    const isDynamic = !!s.dynamic;
+          {/* Model Stats */}
+          {modelStats && Object.keys(modelStats).length > 0 && (
+            <Card>
+              <SectionTitle>Chi phí theo mô hình</SectionTitle>
+              <div className="flex flex-col gap-1">
+                {Object.entries(modelStats)
+                  .sort((a, b) => estimateModelCost(b[0], b[1].promptTokens, b[1].completionTokens) - estimateModelCost(a[0], a[1].promptTokens, a[1].completionTokens))
+                  .map(([model, ms]) => {
+                    const cost = estimateModelCost(model, ms.promptTokens, ms.completionTokens);
+                    const pct = totalModelCost ? (cost / totalModelCost) * 100 : 0;
                     return (
-                      <div
-                        key={label}
-                        onClick={() => toggleSelect(label)}
-                        style={{
-                          display: "flex", alignItems: "center", gap: "8px",
-                          background: isChecked ? "rgba(99,102,241,0.1)" : "rgba(0,0,0,0.2)",
-                          border: `1px solid ${isChecked ? "rgba(99,102,241,0.35)" : "rgba(255,255,255,0.05)"}`,
-                          borderRadius: "7px", padding: "8px 12px",
-                          cursor: "pointer", transition: "all 0.15s",
-                          opacity: isEnabled ? 1 : 0.5,
-                        }}
-                      >
-                        {/* 复选框 */}
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSelect(label)}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ accentColor: "#818cf8", width: "14px", height: "14px", cursor: "pointer", flexShrink: 0 }}
-                        />
-
-                        {/* 健康状态点 */}
-                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", flexShrink: 0,
-                          background: isEnabled ? (s.health === "healthy" ? "#4ade80" : "#f87171") : "#475569" }} />
-
-                        {/* 类型标签 */}
-                        {!isDynamic && (
-                          <span style={{ fontSize: "10px", color: "#64748b", background: "rgba(100,116,139,0.1)", border: "1px solid rgba(100,116,139,0.2)", borderRadius: "4px", padding: "1px 5px", flexShrink: 0 }}>ENV</span>
-                        )}
-
-                        {/* URL / label */}
-                        <span style={{ flex: 1, fontSize: "12px", color: isEnabled ? "#94a3b8" : "#475569", fontFamily: "Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {s.url ?? label}
-                        </span>
-
-                        {/* Nhãn đã tắt */}
-                        {!isEnabled && (
-                          <span style={{ fontSize: "10px", color: "#64748b", background: "rgba(100,116,139,0.15)", border: "1px solid rgba(100,116,139,0.3)", borderRadius: "4px", padding: "1px 6px", flexShrink: 0 }}>Đã tắt</span>
-                        )}
-
-                        <span style={{ fontSize: "11px", color: "#475569", flexShrink: 0 }}>{s.calls} lần</span>
-
-                        {/* Bật/tắt từng node */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onToggleBackend(label, !isEnabled); }}
-                          style={{ background: "none", border: `1px solid ${isEnabled ? "rgba(251,191,36,0.3)" : "rgba(74,222,128,0.3)"}`, borderRadius: "4px", color: isEnabled ? "#fbbf24" : "#4ade80", fontSize: "11px", cursor: "pointer", padding: "1px 7px", flexShrink: 0 }}
-                        >
-                          {isEnabled ? "Tắt" : "Bật"}
-                        </button>
-
-                        {/* 移除仅动态节点可用 */}
-                        {isDynamic && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onRemoveBackend(label); }}
-                            style={{ background: "none", border: "none", color: "#f87171", fontSize: "13px", cursor: "pointer", padding: "0 2px", flexShrink: 0, lineHeight: 1 }}
-                          >×</button>
-                        )}
+                      <div key={model} className="flex flex-col gap-1 py-2 border-b border-border/50 last:border-0">
+                        <div className="flex justify-between items-center text-[12px] font-mono">
+                          <span className="text-accent truncate pr-4">{model}</span>
+                          <span className="text-text-muted shrink-0">${cost.toFixed(4)}</span>
+                        </div>
+                        <div className="w-full h-1 bg-bg rounded-full overflow-hidden">
+                          <div className="h-full bg-accent/60" style={{ width: `${Math.max(1, pct)}%` }} />
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] text-text-subtle mt-0.5 font-mono">
+                          <span>{ms.calls} calls</span>
+                          <span>{ms.promptTokens + ms.completionTokens} tkns</span>
+                        </div>
                       </div>
                     );
                   })}
-                </div>
               </div>
-            )}
-          </>
-        )}
-      </Card>
-
-      <FleetManager />
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// UpdateBar — 全局顶部更新通知条（自动检测，有更新时展示）
-// ---------------------------------------------------------------------------
-
-function UpdateBar({ baseUrl, apiKey: _apiKey }: { baseUrl: string; apiKey: string }) {
-  const [hasUpdate, setHasUpdate] = useState(false);
-  const [latestVer, setLatestVer] = useState("");
-  const [releaseNotes, setReleaseNotes] = useState("");
-  const [dismissed, setDismissed] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [checking, setChecking] = useState(false);
-
-  const check = useCallback(async () => {
-    try {
-      const r = await fetch(`${baseUrl}/api/update/version`);
-      if (!r.ok) return;
-      const d = await r.json();
-      setHasUpdate(!!d.hasUpdate);
-      setLatestVer(d.latestVersion ?? "");
-      setReleaseNotes(d.latestReleaseNotes ?? "");
-    } catch {}
-  }, [baseUrl]);
-
-  useEffect(() => {
-    check();
-    const t = setInterval(check, 10 * 60 * 1000);
-    return () => clearInterval(t);
-  }, [check]);
-
-  const buildPrompt = (ver: string) =>
-    `Hãy giúp tôi cập nhật AI Gateway lên phiên bản mới nhất ${ver}.\n` +
-    `Lấy code mới nhất từ kho GitHub https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-, ghi đè lên các file dự án hiện tại (không cần giữ lại file cũ), ` +
-    `sau đó chạy pnpm install, cuối cùng khởi động lại hai workflow "artifacts/api-server: API Server" và "artifacts/api-portal: web".`;
-
-  const copyPrompt = async () => {
-    const text = buildPrompt(latestVer);
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const el = document.createElement("textarea");
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
-  const recheck = async () => {
-    setChecking(true);
-    await check();
-    setChecking(false);
-  };
-
-  if (dismissed || !hasUpdate) return null;
-
-  return (
-    <div style={{
-      position: "sticky", top: 0, zIndex: 1000,
-      background: "rgba(251,191,36,0.1)",
-      borderBottom: "1px solid rgba(251,191,36,0.3)",
-      backdropFilter: "blur(12px)",
-    }}>
-      <div style={{
-        maxWidth: "900px", margin: "0 auto", padding: "10px 24px",
-        display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap",
-      }}>
-        <span style={{ fontSize: "16px", flexShrink: 0 }}>🎉</span>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: "13px", color: "#fbbf24" }}>
-            <strong>Phát hiện phiên bản mới v{latestVer}</strong>
-            {releaseNotes && <span style={{ color: "#92400e", marginLeft: "10px", fontSize: "12px" }}>{releaseNotes}</span>}
-          </span>
+            </Card>
+          )}
         </div>
-
-        {/* 复制提示词 — 粘贴给 Replit Agent 完成更新 */}
-        <button
-          onClick={copyPrompt}
-          style={{
-            padding: "5px 14px", borderRadius: "7px", fontSize: "12.5px", fontWeight: 700,
-            border: `1px solid ${copied ? "rgba(74,222,128,0.5)" : "rgba(251,191,36,0.5)"}`,
-            background: copied ? "rgba(74,222,128,0.15)" : "rgba(251,191,36,0.18)",
-            color: copied ? "#4ade80" : "#fbbf24",
-            cursor: "pointer", flexShrink: 0, transition: "all 0.2s",
-          }}
-        >
-          {copied ? "✓ Đã sao chép! Dán cho Agent" : "📋 Sao chép hướng dẫn cập nhật"}
-        </button>
-
-        <button
-          onClick={recheck}
-          disabled={checking}
-          style={{
-            padding: "5px 10px", borderRadius: "7px", fontSize: "12px",
-            border: "1px solid rgba(251,191,36,0.25)",
-            background: "transparent", color: "#92400e",
-            cursor: checking ? "not-allowed" : "pointer", flexShrink: 0,
-            opacity: checking ? 0.5 : 1,
-          }}
-        >
-          {checking ? "Đang kiểm tra…" : "Kiểm tra lại"}
-        </button>
-
-        <button
-          onClick={() => setDismissed(true)}
-          style={{ background: "none", border: "none", color: "#92400e", fontSize: "18px", cursor: "pointer", flexShrink: 0, lineHeight: 1 }}
-        >×</button>
       </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
+// PageModels
+// ---------------------------------------------------------------------------
+
+type ModelStatus = { id: string; provider: string; enabled: boolean };
+type GroupSummary = { total: number; enabled: number };
+
+function PageModels({
+  baseUrl, apiKey, modelStatus, summary, onRefresh, onToggleProvider, onToggleModel
+}: {
+  baseUrl: string; apiKey: string; modelStatus: ModelStatus[]; summary: Record<string, GroupSummary>;
+  onRefresh: () => void; onToggleProvider: (p: string, e: boolean) => void; onToggleModel: (id: string, e: boolean) => void;
+}) {
+  if (!apiKey) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
+        <Boxes className="w-12 h-12 mb-4 opacity-50" />
+        <p className="text-sm">Vui lòng nhập API Key ở trang Tổng quan để xem Mô hình</p>
+      </div>
+    );
+  }
+
+  const groups = [
+    { title: "OpenAI", provider: "openai" as Provider, models: OPENAI_MODELS },
+    { title: "Anthropic", provider: "anthropic" as Provider, models: ANTHROPIC_MODELS },
+    { title: "Google Gemini", provider: "gemini" as Provider, models: GEMINI_MODELS },
+    { title: "OpenRouter", provider: "openrouter" as Provider, models: OPENROUTER_MODELS },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {groups.map((g) => {
+        const sum = summary[g.provider] ?? { total: g.models.length, enabled: g.models.length };
+        const isAllEnabled = sum.enabled === sum.total && sum.total > 0;
+        
+        return (
+          <Card key={g.provider} className="p-0 overflow-hidden border border-border">
+            <div className="bg-surface-2/50 px-5 py-3 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="font-semibold text-text text-sm">{g.title}</div>
+                <div className="text-[11px] font-mono text-text-subtle bg-bg px-2 py-0.5 rounded border border-border-strong">
+                  {sum.enabled}/{sum.total}
+                </div>
+              </div>
+              <button
+                onClick={() => onToggleProvider(g.provider, !isAllEnabled)}
+                className="text-[11px] font-medium text-text-muted hover:text-text px-3 py-1 bg-bg border border-border rounded-md transition-colors"
+              >
+                {isAllEnabled ? "Tắt tất cả" : "Bật tất cả"}
+              </button>
+            </div>
+            
+            <div className="flex flex-col">
+              {g.models.map((m) => {
+                const status = modelStatus.find(ms => ms.id === m.id);
+                const enabled = status ? status.enabled : true;
+                return (
+                  <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-5 py-3 border-b border-border/50 last:border-0 hover:bg-surface-2/30 transition-colors">
+                    <code className="font-mono text-[12.5px] text-accent w-[240px] shrink-0 truncate">{m.id}</code>
+                    <span className="text-[12px] text-text-subtle flex-1 truncate">{m.desc}</span>
+                    <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 w-full sm:w-auto">
+                      <div className="flex items-center gap-2">
+                        {m.context && <span className="text-[10px] text-text-muted bg-surface-2 px-1.5 py-0.5 rounded border border-border font-mono">{m.context}</span>}
+                        {m.badge && <Badge variant={m.badge} />}
+                      </div>
+                      <button
+                        onClick={() => onToggleModel(m.id, !enabled)}
+                        className={cn(
+                          "relative w-9 h-5 rounded-full shrink-0 transition-colors",
+                          enabled ? "bg-accent" : "bg-surface-2"
+                        )}
+                      >
+                        <span className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full transition-all shadow-sm",
+                          enabled ? "left-[18px]" : "left-1"
+                        )} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// PageEndpoints
+// ---------------------------------------------------------------------------
+
+function PageEndpoints({ baseUrl }: { baseUrl: string }) {
+  const endpoints = [
+    { method: "POST" as const, path: "/v1/chat/completions", desc: "Chat Completions API (OpenAI format, tự động định tuyến)", code: `curl -X POST ${baseUrl}/v1/chat/completions \\\n  -H "Authorization: Bearer <your-proxy-key>" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"claude-sonnet-4-6","messages":[{"role":"user","content":"Hello"}],"stream":true}'` },
+    { method: "POST" as const, path: "/v1/messages", desc: "Anthropic Messages API", code: `curl -X POST ${baseUrl}/v1/messages \\\n  -H "x-api-key: <your-proxy-key>" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"claude-sonnet-4-6","max_tokens":1024,"messages":[{"role":"user","content":"Hello"}]}'` },
+    { method: "GET" as const, path: "/v1/models", desc: "Danh sách mô hình khả dụng", code: `curl -X GET ${baseUrl}/v1/models \\\n  -H "Authorization: Bearer <your-proxy-key>"` }
+  ];
+
+  return (
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      {endpoints.map((ep, i) => (
+        <Card key={i} className="p-5 flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <MethodBadge method={ep.method} />
+            <code className="font-mono text-[13px] text-text">{baseUrl}{ep.path}</code>
+            <CopyButton text={`${baseUrl}${ep.path}`} label="" />
+          </div>
+          <p className="text-[12.5px] text-text-subtle m-0">{ep.desc}</p>
+          <CodeBlock code={ep.code} />
+        </Card>
+      ))}
+      <Card className="p-5">
+        <SectionTitle>Tài liệu chi tiết</SectionTitle>
+        <PageDocs />
+      </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Fleet Manager
-// 上游版本检测地址改为 GitHub raw，子节点从 GitHub 拉取更新，无需上游 Replit 在线
 // ---------------------------------------------------------------------------
 
 const _UPSTREAM_VER_URL = "https://raw.githubusercontent.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-/main/version.json";
@@ -1413,8 +871,6 @@ function saveFleet(data: FleetInstance[]) {
 }
 function genId() { return Math.random().toString(36).slice(2, 9); }
 
-// Normalize user-supplied URL to the correct backend endpoint.
-// Expected format: https://{project}.replit.app/api
 function normalizeBackendUrl(raw: string): string {
   const url = raw.trim().replace(/\/+$/, "");
   if (!url) return url;
@@ -1426,7 +882,6 @@ function FleetManager() {
   const [addName, setAddName] = useState("");
   const [addUrl, setAddUrl] = useState("");
   const [addKey, setAddKey] = useState("");
-  const [logTarget, setLogTarget] = useState<string | null>(null);
 
   const persist = (next: FleetInstance[]) => { setInstances(next); saveFleet(next); };
 
@@ -1445,7 +900,6 @@ function FleetManager() {
   };
 
   const removeInst = (id: string) => persist(instances.filter((i) => i.id !== id));
-
   const patchInst = (id: string, patch: Partial<FleetInstance>) => {
     const next = instances.map((i) => i.id === id ? { ...i, ...patch } : i);
     persist(next); return next;
@@ -1495,10 +949,8 @@ function FleetManager() {
         updateLog: logMsg,
         lastChecked: Date.now(),
       });
-      setLogTarget(id);
     } catch (e) {
       patchInst(id, { status: "error", updateLog: `Lỗi: ${(e as Error).message}`, lastChecked: Date.now() });
-      setLogTarget(id);
     }
   };
 
@@ -1508,513 +960,74 @@ function FleetManager() {
     for (const inst of toUpdate) await updateOne(inst.id);
   };
 
-  const exportJson = () => {
-    const data = instances.map(({ name, url, key }) => ({ name, url, key }));
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "fleet.json";
-    a.click();
-  };
-
-  const importJson = () => {
-    const input = document.createElement("input");
-    input.type = "file"; input.accept = ".json,application/json";
-    input.onchange = async (e) => {
-      try {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-        const arr = JSON.parse(await file.text()) as Array<{ name?: string; url?: string; key?: string }>;
-        let added = 0;
-        const next = [...instances];
-        for (const item of arr) {
-          if (!item.url || !item.key) continue;
-          if (next.some((i) => i.url === item.url)) continue;
-          next.push({
-            id: genId(), name: item.name || item.url,
-            url: item.url.replace(/\/+$/, ""), key: item.key,
-            status: "unknown", version: null, latestVersion: null,
-            updateAvailable: false, lastChecked: null, updateLog: null,
-          });
-          added++;
-        }
-        persist(next);
-        if (added === 0) alert("Không có node mới được nhập (URL trùng lặp hoặc định dạng sai)");
-      } catch (err) { alert(`Nhập thất bại: ${(err as Error).message}`); }
-    };
-    input.click();
-  };
-
-  const statusTag = (inst: FleetInstance) => {
-    if (inst.status === "checking") return { label: "Đang kiểm tra", color: "#94a3b8", bg: "rgba(148,163,184,0.12)" };
-    if (inst.status === "updating") return { label: "Đang cập nhật", color: "#fbbf24", bg: "rgba(251,191,36,0.12)" };
-    if (inst.status === "restarting") return { label: "Đang khởi động lại", color: "#818cf8", bg: "rgba(129,140,248,0.12)" };
-    if (inst.status === "error") return { label: "Kết nối thất bại", color: "#f87171", bg: "rgba(248,113,113,0.12)" };
-    if (inst.status === "ok") {
-      if (inst.updateAvailable) return { label: `Có phiên bản mới v${inst.latestVersion ?? ""}`, color: "#fbbf24", bg: "rgba(251,191,36,0.12)" };
-      return { label: "Đã là mới nhất", color: "#4ade80", bg: "rgba(74,222,128,0.12)" };
-    }
-    return { label: "Chưa kiểm tra", color: "#475569", bg: "rgba(71,85,105,0.12)" };
-  };
-
-  const hasUpdates = instances.some((i) => i.updateAvailable);
-  const logInst = instances.find((i) => i.id === logTarget);
-
-  const inp: React.CSSProperties = {
-    background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: "7px", padding: "7px 11px", color: "#e2e8f0",
-    fontFamily: "Menlo, monospace", fontSize: "12.5px", outline: "none",
-  };
-
   return (
     <Card>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-        <SectionTitle>Quản lý node con</SectionTitle>
-        <div style={{ display: "flex", gap: "6px", marginTop: "-16px" }}>
-          <button onClick={importJson} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: "#64748b", fontSize: "11px", padding: "4px 10px", cursor: "pointer" }}>Nhập JSON</button>
-          <button onClick={exportJson} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: "#64748b", fontSize: "11px", padding: "4px 10px", cursor: "pointer" }}>Xuất JSON</button>
-          <button onClick={checkAll} disabled={instances.length === 0} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: "#94a3b8", fontSize: "11px", padding: "4px 10px", cursor: "pointer" }}>Kiểm tra tất cả</button>
-          {hasUpdates && (
-            <button onClick={updateAll} style={{ background: "rgba(251,191,36,0.15)", border: "1px solid rgba(251,191,36,0.35)", borderRadius: "6px", color: "#fbbf24", fontSize: "11px", padding: "4px 10px", cursor: "pointer", fontWeight: 600 }}>Cập nhật tất cả</button>
-          )}
-        </div>
-      </div>
-      <p style={{ margin: "0 0 14px", fontSize: "12.5px", color: "#475569" }}>Quản lý nhiều phiên bản triển khai · Dữ liệu lưu trong trình duyệt</p>
-
-      {/* Add form */}
-      <div style={{ marginBottom: "14px" }}>
-        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-          <input style={{ ...inp, flex: "0 0 110px" }} placeholder="Tên" value={addName} onChange={(e) => setAddName(e.target.value)} />
-          <input style={{ ...inp, flex: "2 1 180px" }} placeholder="https://your-proxy.replit.app (địa chỉ gốc)" value={addUrl} onChange={(e) => setAddUrl(e.target.value)} />
-          <input type="password" style={{ ...inp, flex: "1 1 130px" }} placeholder="PROXY_API_KEY" value={addKey} onChange={(e) => setAddKey(e.target.value)} />
-          <button onClick={addInst} disabled={!addUrl || !addKey} style={{
-            background: "rgba(99,102,241,0.7)", border: "1px solid rgba(99,102,241,0.6)",
-            color: "#e0e7ff", borderRadius: "7px", padding: "7px 16px",
-            fontSize: "13px", fontWeight: 600, cursor: (!addUrl || !addKey) ? "not-allowed" : "pointer",
-            opacity: (!addUrl || !addKey) ? 0.5 : 1, flexShrink: 0,
-          }}>Thêm</button>
-        </div>
-      </div>
-
-      {/* Table */}
-      {instances.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "24px 0", color: "#334155", fontSize: "13px" }}>Chưa có node, hãy thêm ở trên</div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {instances.map((inst) => {
-            const tag = statusTag(inst);
-            const busy = inst.status === "checking" || inst.status === "updating";
-            const timeStr = inst.lastChecked ? new Date(inst.lastChecked).toLocaleTimeString() : null;
-            return (
-              <div key={inst.id} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "9px", padding: "11px 14px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                  {/* Dot */}
-                  <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: tag.color, flexShrink: 0 }} />
-                  {/* Name */}
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#cbd5e1", minWidth: "80px" }}>{inst.name}</span>
-                  {/* URL (truncated) */}
-                  <span style={{ fontSize: "11px", color: "#334155", fontFamily: "Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, maxWidth: "240px" }}>{inst.url}</span>
-                  {/* Version */}
-                  {inst.version && (
-                    <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "Menlo, monospace", flexShrink: 0 }}>v{inst.version}</span>
-                  )}
-                  {/* Status badge */}
-                  <span style={{ fontSize: "11px", fontWeight: 600, color: tag.color, background: tag.bg, borderRadius: "99px", padding: "2px 9px", flexShrink: 0 }}>{tag.label}</span>
-                  {/* Time */}
-                  {timeStr && <span style={{ fontSize: "10px", color: "#334155", flexShrink: 0 }}>{timeStr}</span>}
-                  {/* Actions */}
-                  <div style={{ display: "flex", gap: "5px", flexShrink: 0, marginLeft: "auto" }}>
-                    <button onClick={() => checkOne(inst.id)} disabled={busy} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "5px", color: "#94a3b8", fontSize: "11px", padding: "3px 9px", cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.4 : 1 }}>Kiểm tra</button>
-                    <button onClick={() => updateOne(inst.id)} disabled={busy} style={{ background: inst.updateAvailable ? "rgba(251,191,36,0.12)" : "none", border: `1px solid ${inst.updateAvailable ? "rgba(251,191,36,0.4)" : "rgba(255,255,255,0.1)"}`, borderRadius: "5px", color: inst.updateAvailable ? "#fbbf24" : "#64748b", fontSize: "11px", padding: "3px 9px", cursor: busy ? "not-allowed" : "pointer", opacity: busy ? 0.4 : 1 }}>Cập nhật</button>
-                    {inst.updateLog && (
-                      <button onClick={() => setLogTarget(logTarget === inst.id ? null : inst.id)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "5px", color: "#475569", fontSize: "11px", padding: "3px 9px", cursor: "pointer" }}>Nhật ký</button>
-                    )}
-                    <button onClick={() => removeInst(inst.id)} style={{ background: "none", border: "1px solid rgba(248,113,113,0.3)", borderRadius: "5px", color: "#f87171", fontSize: "11px", padding: "3px 9px", cursor: "pointer" }}>Xóa</button>
-                  </div>
-                </div>
-                {/* Log */}
-                {logTarget === inst.id && logInst?.updateLog && (
-                  <div style={{ marginTop: "10px", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "6px", padding: "10px 14px", fontFamily: "Menlo, monospace", fontSize: "12px", color: "#4ade80", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
-                    {logInst.updateLog}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function PageEndpoints({ displayUrl, expandedGroups, onToggleGroup, totalModels }: {
-  displayUrl: string;
-  expandedGroups: Record<string, boolean>;
-  onToggleGroup: (g: string) => void;
-  totalModels: number;
-}) {
-  return (
-    <>
-      {/* Endpoint list */}
-      <Card style={{ marginBottom: "14px" }}>
-        <SectionTitle>Danh sách API endpoint</SectionTitle>
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {([
-            { method: "GET", path: "/v1/models", desc: "Liệt kê tất cả model khả dụng" },
-            { method: "POST", path: "/v1/chat/completions", desc: "Chat Completions – OpenAI format (Tool Calling + Streaming)" },
-            { method: "POST", path: "/v1/messages", desc: "Claude Messages API – native format" },
-            { method: "POST", path: "/v1/models/:model:generateContent", desc: "Gemini native – non-streaming (alias: /v1beta/...)" },
-            { method: "POST", path: "/v1/models/:model:streamGenerateContent", desc: "Gemini native – SSE streaming (alias: /v1beta/...)" },
-            { method: "GET", path: "/v1/stats", desc: "Xem thống kê sử dụng các backend (cần API Key)" },
-            { method: "GET", path: "/v1/admin/backends", desc: "Liệt kê tất cả backend node (cần API Key)" },
-            { method: "POST", path: "/v1/admin/backends", desc: "Thêm node mới động (cần API Key)" },
-            { method: "DELETE", path: "/v1/admin/backends/:label", desc: "Xóa node động (cần API Key)" },
-          ] as { method: "GET" | "POST" | "DELETE"; path: string; desc: string }[]).map((ep) => (
-            <div key={`${ep.method}:${ep.path}`} style={{
-              display: "flex", alignItems: "center", gap: "10px",
-              background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: "8px", padding: "10px 14px",
-            }}>
-              <MethodBadge method={ep.method as "GET" | "POST"} />
-              <code style={{ color: "#e2e8f0", fontFamily: "Menlo, monospace", fontSize: "12.5px", flex: 1 }}>{ep.path}</code>
-              <span style={{ color: "#475569", fontSize: "12px", flexShrink: 0, maxWidth: "260px", textAlign: "right" }}>{ep.desc}</span>
-              <CopyButton text={`${displayUrl}${ep.path}`} />
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Auth */}
-      <Card style={{ marginBottom: "14px" }}>
-        <SectionTitle>Phương thức xác thực (chọn một trong bốn)</SectionTitle>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {[
-            { label: "Authorization: Bearer (khuyến nghị, tương thích tất cả client OpenAI)", code: `Authorization: Bearer YOUR_PROXY_API_KEY` },
-            { label: "x-api-key Header (tương thích client OpenAI cũ)", code: `x-api-key: YOUR_PROXY_API_KEY` },
-            { label: "x-goog-api-key Header (tương thích Gemini SDK)", code: `x-goog-api-key: YOUR_PROXY_API_KEY` },
-            { label: "Tham số URL ?key= (phù hợp debug đơn giản)", code: `${displayUrl}/v1/models?key=YOUR_PROXY_API_KEY` },
-          ].map((auth) => (
-            <div key={auth.label}>
-              <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "4px" }}>{auth.label}</div>
-              <CodeBlock code={auth.code} />
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Tool Calling */}
-      <Card style={{ marginBottom: "14px" }}>
-        <SectionTitle>Ví dụ Tool Calling / Function Calling</SectionTitle>
-        <p style={{ margin: "0 0 12px", color: "#64748b", fontSize: "13px", lineHeight: "1.6" }}>
-          Sử dụng định dạng <code style={{ color: "#a78bfa", background: "rgba(167,139,250,0.1)", padding: "1px 5px", borderRadius: "4px" }}>tools</code> chuẩn OpenAI, proxy tự động chuyển đổi sang định dạng từng backend.
-        </p>
-        <CodeBlock
-          code={`curl ${displayUrl}/v1/chat/completions \\
-  -H "Authorization: Bearer YOUR_PROXY_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "gpt-4.1-mini",
-    "messages": [{"role": "user", "content": "Thời tiết Hà Nội thế nào?"}],
-    "tools": [{
-      "type": "function",
-      "function": {
-        "name": "get_weather",
-        "description": "Get weather for a city",
-        "parameters": {
-          "type": "object",
-          "properties": { "city": {"type": "string"} },
-          "required": ["city"]
-        }
-      }
-    }],
-    "tool_choice": "auto"
-  }'`}
-        />
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
-          {["OpenAI ✓ pass-through", "Anthropic ✓ chuyển đổi tool_use", "Gemini ✓ chuyển đổi functionDeclarations", "OpenRouter ✓ pass-through"].map((s) => (
-            <span key={s} style={{
-              fontSize: "11px", color: "#4ade80", background: "rgba(74,222,128,0.08)",
-              border: "1px solid rgba(74,222,128,0.2)", borderRadius: "5px", padding: "3px 8px",
-            }}>{s}</span>
-          ))}
-        </div>
-      </Card>
-
-      {/* Quick Test */}
-      <Card style={{ marginBottom: "14px" }}>
-        <SectionTitle>Kiểm tra nhanh</SectionTitle>
-        <CodeBlock
-          code={`curl ${displayUrl}/v1/models \\
-  -H "Authorization: Bearer YOUR_PROXY_API_KEY"`}
-          copyText={`curl ${displayUrl}/v1/models \\\n  -H "Authorization: Bearer YOUR_PROXY_API_KEY"`}
-        />
-        <div style={{ marginTop: "14px" }}>
-          <div style={{ fontSize: "12px", color: "#64748b", marginBottom: "8px" }}>Kiểm tra stream:</div>
-          <CodeBlock
-            code={`curl ${displayUrl}/v1/chat/completions \\
-  -H "Authorization: Bearer YOUR_PROXY_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Hello!"}],"stream":true}'`}
-          />
-        </div>
-      </Card>
-
-      {/* Models */}
-      <Card style={{ marginBottom: "14px" }}>
-        <SectionTitle>Mô hình khả dụng ({totalModels} mô hình)</SectionTitle>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "14px" }}>
-          {(["thinking", "thinking-visible", "tools", "reasoning"] as const).map((v) => (
-            <div key={v} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <Badge variant={v} />
-              <span style={{ fontSize: "11px", color: "#475569" }}>
-                {v === "thinking" ? "Extended Thinking (ẩn)" : v === "thinking-visible" ? "Extended Thinking (hiện)" : v === "tools" ? "Tool Calling" : "Reasoning"}
-              </span>
-            </div>
-          ))}
-        </div>
-        <ModelGroup title="OpenAI" models={OPENAI_MODELS} provider="openai" expanded={expandedGroups.openai} onToggle={() => onToggleGroup("openai")} />
-        <ModelGroup title="Anthropic Claude" models={ANTHROPIC_MODELS} provider="anthropic" expanded={expandedGroups.anthropic} onToggle={() => onToggleGroup("anthropic")} />
-        <ModelGroup title="Google Gemini" models={GEMINI_MODELS} provider="gemini" expanded={expandedGroups.gemini} onToggle={() => onToggleGroup("gemini")} />
-        <ModelGroup title="OpenRouter (bất kỳ provider/model nào đều có thể định tuyến)" models={OPENROUTER_MODELS} provider="openrouter" expanded={expandedGroups.openrouter} onToggle={() => onToggleGroup("openrouter")} />
-        <p style={{ margin: "10px 0 0", fontSize: "12px", color: "#334155", lineHeight: "1.5" }}>
-          💡 Bất kỳ tên mô hình nào chứa <code style={{ color: "#a78bfa" }}>/</code> sẽ tự động định tuyến đến OpenRouter, không giới hạn danh sách trên.
-        </p>
-      </Card>
-
-      {/* CherryStudio Guide */}
-      <Card>
-        <SectionTitle>Hướng dẫn kết nối CherryStudio</SectionTitle>
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {[
-            { step: 1, title: "Mở Cài đặt → Model Provider", desc: "Trong CherryStudio, nhấp vào Cài đặt ở bên trái, chọn «Model Provider»." },
-            { step: 2, title: "Thêm nhà cung cấp, chọn loại «OpenAI Compatible»", desc: "Nhấp «Thêm nhà cung cấp», chọn loại «OpenAI Compatible» (không chọn OpenAI gốc)." },
-            {
-              step: 3, title: "Nhập Base URL và API Key",
-              desc: (
-                <span>
-                  Base URL nhập domain môi trường production, API Key nhập <code style={{ color: "#a78bfa", background: "rgba(167,139,250,0.1)", padding: "1px 5px", borderRadius: "4px" }}>PROXY_API_KEY</code>.
-                  <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "12px", color: "#475569", flexShrink: 0 }}>Địa chỉ hiện tại</span>
-                    <code style={{ flex: 1, color: "#a78bfa", fontSize: "12px", fontFamily: "Menlo, monospace", overflow: "hidden", textOverflow: "ellipsis" }}>{displayUrl}</code>
-                    <CopyButton text={displayUrl} />
-                  </div>
-                </span>
-              ),
-            },
-            { step: 4, title: "Nhấp «Kiểm tra» hoặc «Thêm mô hình»", desc: `CherryStudio sẽ tự động gọi /v1/models để tải danh sách ${totalModels} mô hình, chọn mô hình cần dùng là xong.` },
-          ].map((item) => (
-            <div key={item.step} style={{ display: "flex", gap: "14px" }}>
-              <div style={{
-                width: "28px", height: "28px", borderRadius: "50%",
-                background: "rgba(99,102,241,0.2)", border: "1px solid rgba(99,102,241,0.4)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "13px", fontWeight: 700, color: "#818cf8", flexShrink: 0, marginTop: "1px",
-              }}>{item.step}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, color: "#cbd5e1", fontSize: "14px", marginBottom: "4px" }}>{item.title}</div>
-                <div style={{ color: "#475569", fontSize: "13px", lineHeight: "1.5" }}>{item.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// PageModels — model enable/disable management
-// ---------------------------------------------------------------------------
-
-interface ModelStatus { id: string; provider: string; enabled: boolean }
-
-type GroupSummary = { total: number; enabled: number };
-
-function ModelToggle({ enabled, onChange }: { enabled: boolean; onChange: () => void }) {
-  return (
-    <button
-      onClick={onChange}
-      style={{
-        width: "36px", height: "20px", borderRadius: "10px", border: "none",
-        background: enabled ? "rgba(99,102,241,0.7)" : "rgba(100,116,139,0.3)",
-        position: "relative", cursor: "pointer", flexShrink: 0, transition: "background 0.15s",
-        padding: 0,
-      }}
-    >
-      <div style={{
-        width: "14px", height: "14px", borderRadius: "50%", background: "#fff",
-        position: "absolute", top: "3px",
-        left: enabled ? "19px" : "3px",
-        transition: "left 0.15s",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
-      }} />
-    </button>
-  );
-}
-
-function PageModels({
-  baseUrl, apiKey, modelStatus, summary, onRefresh, onToggleProvider, onToggleModel,
-}: {
-  baseUrl: string;
-  apiKey: string;
-  modelStatus: ModelStatus[];
-  summary: Record<string, GroupSummary>;
-  onRefresh: () => void;
-  onToggleProvider: (provider: string, enabled: boolean) => void;
-  onToggleModel: (id: string, enabled: boolean) => void;
-}) {
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    openai: true, anthropic: true, gemini: true, openrouter: true,
-  });
-  const [filter, setFilter] = useState<"all" | "enabled" | "disabled">("all");
-
-  const allGroups: { key: string; title: string; models: ModelEntry[]; provider: Provider }[] = [
-    { key: "openai", title: "OpenAI", models: OPENAI_MODELS, provider: "openai" },
-    { key: "anthropic", title: "Anthropic Claude", models: ANTHROPIC_MODELS, provider: "anthropic" },
-    { key: "gemini", title: "Google Gemini", models: GEMINI_MODELS, provider: "gemini" },
-    { key: "openrouter", title: "OpenRouter", models: OPENROUTER_MODELS, provider: "openrouter" },
-  ];
-
-  const statusMap = new Map(modelStatus.map((m) => [m.id, m.enabled]));
-
-  const totalEnabled = modelStatus.filter((m) => m.enabled).length;
-  const totalCount = modelStatus.length;
-
-  if (!apiKey) {
-    return (
-      <Card>
-        <div style={{ textAlign: "center", color: "#475569", padding: "40px 0" }}>
-          <div style={{ fontSize: "24px", marginBottom: "12px" }}>🔒</div>
-          <div>Vui lòng nhập API Key ở trang chủ trước khi quản lý bật/tắt mô hình</div>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <>
-      {/* 顶部统计行 */}
-      <Card style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-        <div style={{ flex: 1 }}>
-          <SectionTitle>Quản lý bật/tắt mô hình</SectionTitle>
-          <div style={{ fontSize: "13px", color: "#475569" }}>
-            Đã bật <span style={{ color: "#a5b4fc", fontWeight: 700 }}>{totalEnabled}</span> / {totalCount} mô hình
-            · Mô hình bị tắt sẽ không xuất hiện trong phản hồi <code style={{ fontFamily: "Menlo, monospace", fontSize: "12px", color: "#818cf8" }}>/v1/models</code>, trả về 403 khi gọi
-          </div>
-        </div>
-        {/* 过滤器 */}
-        <div style={{ display: "flex", gap: "4px" }}>
-          {(["all", "enabled", "disabled"] as const).map((f) => (
-            <button key={f} onClick={() => setFilter(f)} style={{
-              padding: "5px 12px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.08)",
-              background: filter === f ? "rgba(99,102,241,0.2)" : "transparent",
-              color: filter === f ? "#a5b4fc" : "#475569", fontSize: "12px", cursor: "pointer",
-              fontWeight: filter === f ? 600 : 400,
-            }}>
-              {f === "all" ? "Tất cả" : f === "enabled" ? "Đã bật" : "Đã tắt"}
+      <div className="flex items-center justify-between mb-4">
+        <SectionTitle>Quản lý phiên bản cụm Node</SectionTitle>
+        <div className="flex gap-2">
+          {instances.some((i) => i.updateAvailable) && (
+            <button onClick={updateAll} className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20 transition-colors">
+              Cập nhật tất cả
             </button>
-          ))}
+          )}
+          <button onClick={checkAll} disabled={instances.length === 0} className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-surface-2 text-text-muted hover:text-text border border-border hover:bg-border-strong transition-colors disabled:opacity-50">
+            Kiểm tra tất cả
+          </button>
         </div>
-        <button onClick={onRefresh} style={{
-          padding: "6px 14px", borderRadius: "7px",
-          border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)",
-          color: "#475569", fontSize: "12px", cursor: "pointer",
-        }}>Làm mới</button>
-      </Card>
+      </div>
+      <p className="text-[12.5px] text-text-subtle mb-4">
+        Theo dõi và cập nhật hàng loạt các node con (qua API /api/update/apply). Yêu cầu nhập đúng URL gốc và mật khẩu của từng node.
+      </p>
 
-      {/* 各组 */}
-      {allGroups.map(({ key, title, models, provider }) => {
-        const c = PROVIDER_COLORS[provider];
-        const grpSummary = summary[key] ?? { total: models.length, enabled: models.length };
-        const isExpanded = expandedGroups[key];
-        const groupEnabled = grpSummary.enabled > 0;
-        const allEnabled = grpSummary.enabled === grpSummary.total;
-
-        const filteredModels = models.filter((m) => {
-          const en = statusMap.get(m.id) ?? true;
-          if (filter === "enabled") return en;
-          if (filter === "disabled") return !en;
-          return true;
-        });
-
-        return (
-          <div key={key} style={{ marginBottom: "10px" }}>
-            {/* Group header */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: "10px",
-              background: c.bg, border: `1px solid ${c.border}`, borderRadius: "8px",
-              padding: "10px 14px",
-            }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: c.dot, flexShrink: 0 }} />
-              <button onClick={() => setExpandedGroups((p) => ({ ...p, [key]: !p[key] }))} style={{
-                background: "none", border: "none", padding: 0, cursor: "pointer",
-                fontWeight: 600, color: c.text, fontSize: "13px", flex: 1, textAlign: "left",
-              }}>
-                {title}
-              </button>
-              {/* 统计 */}
-              <span style={{ fontSize: "12px", color: "#475569" }}>
-                {grpSummary.enabled}/{grpSummary.total} đã bật
-              </span>
-              {/* Nút hàng loạt */}
-              <button onClick={() => onToggleProvider(key, true)} style={{
-                padding: "3px 10px", borderRadius: "5px", fontSize: "11px",
-                border: "1px solid rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.08)",
-                color: "#4ade80", cursor: "pointer",
-              }}>Bật tất cả</button>
-              <button onClick={() => onToggleProvider(key, false)} style={{
-                padding: "3px 10px", borderRadius: "5px", fontSize: "11px",
-                border: "1px solid rgba(248,113,113,0.3)", background: "rgba(248,113,113,0.08)",
-                color: "#f87171", cursor: "pointer",
-              }}>Tắt tất cả</button>
-              {/* 组级总开关 */}
-              <ModelToggle
-                enabled={groupEnabled}
-                onChange={() => onToggleProvider(key, !allEnabled)}
-              />
-              <button onClick={() => setExpandedGroups((p) => ({ ...p, [key]: !p[key] }))} style={{
-                background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: "11px",
-              }}>{isExpanded ? "▲" : "▼"}</button>
-            </div>
-
-            {/* 模型列表 */}
-            {isExpanded && filteredModels.length > 0 && (
-              <div style={{ marginTop: "4px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                {filteredModels.map((m) => {
-                  const enabled = statusMap.get(m.id) ?? true;
-                  return (
-                    <div key={m.id} style={{
-                      display: "flex", alignItems: "center", gap: "10px",
-                      background: enabled ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.35)",
-                      border: `1px solid ${enabled ? "rgba(255,255,255,0.05)" : "rgba(248,113,113,0.12)"}`,
-                      borderRadius: "7px", padding: "6px 12px",
-                      opacity: enabled ? 1 : 0.55, transition: "all 0.15s",
-                    }}>
-                      <code style={{
-                        fontFamily: "Menlo, monospace", fontSize: "11.5px",
-                        color: enabled ? c.text : "#475569",
-                        flex: 1, wordBreak: "break-all",
-                      }}>{m.id}</code>
-                      <span style={{ fontSize: "11.5px", color: "#334155", flexShrink: 0 }}>{m.desc}</span>
-                      {m.context && (
-                        <span style={{ fontSize: "10px", color: "#334155", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "3px", padding: "1px 5px", flexShrink: 0 }}>{m.context}</span>
-                      )}
-                      {m.badge && <Badge variant={m.badge} />}
-                      <ModelToggle enabled={enabled} onChange={() => onToggleModel(m.id, !enabled)} />
-                    </div>
-                  );
-                })}
+      <div className="flex flex-col gap-3">
+        {instances.map((i) => (
+          <div key={i.id} className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-bg">
+            <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-[13px] text-text truncate">{i.name}</span>
+                  {i.status === "ok" && !i.updateAvailable && <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-success/10 text-success border border-success/20">v{i.version}</span>}
+                  {i.updateAvailable && <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-warning/10 text-warning border border-warning/20 animate-pulse">v{i.version} ↑ {i.latestVersion}</span>}
+                  {i.status === "checking" && <span className="text-[10px] text-text-subtle">Đang kiểm tra...</span>}
+                  {i.status === "error" && <span className="text-[10px] text-danger">Lỗi kết nối</span>}
+                  {i.status === "updating" && <span className="text-[10px] text-accent animate-pulse">Đang cập nhật...</span>}
+                  {i.status === "restarting" && <span className="text-[10px] text-warning animate-pulse">Đang khởi động lại...</span>}
+                </div>
+                <div className="text-[11px] font-mono text-text-subtle truncate">{i.url}</div>
               </div>
-            )}
-            {isExpanded && filteredModels.length === 0 && (
-              <div style={{ padding: "10px 14px", color: "#334155", fontSize: "12.5px" }}>
-                Không có mô hình nào khớp với bộ lọc này
+              <div className="flex items-center gap-2">
+                <button onClick={() => checkOne(i.id)} disabled={i.status === "checking" || i.status === "updating"} className="p-1.5 rounded bg-surface text-text-subtle hover:text-text border border-border hover:bg-border-strong transition-colors disabled:opacity-50">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                {i.updateAvailable && (
+                  <button onClick={() => updateOne(i.id)} disabled={i.status === "updating" || i.status === "restarting"} className="px-2 py-1 rounded text-[11px] font-medium bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20 transition-colors disabled:opacity-50">
+                    Cập nhật
+                  </button>
+                )}
+                <button onClick={() => removeInst(i.id)} className="p-1.5 rounded text-danger/70 hover:text-danger hover:bg-danger/10 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+            {i.updateLog && (
+              <div className="mt-1 p-2 rounded bg-[#0a0a0c] border border-border-strong text-[11px] font-mono text-text-muted break-all">
+                {i.updateLog}
               </div>
             )}
           </div>
-        );
-      })}
-    </>
+        ))}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-border">
+        <div className="text-[12px] font-semibold text-text mb-3">Thêm Node vào trình quản lý</div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input type="text" placeholder="Tên (tuỳ chọn)" value={addName} onChange={(e) => setAddName(e.target.value)} className="w-full sm:w-32 bg-bg border border-border-strong rounded-lg px-3 py-2 text-[12.5px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50" />
+          <input type="url" placeholder="https://node-url.replit.app" value={addUrl} onChange={(e) => setAddUrl(e.target.value)} className="flex-1 min-w-[200px] bg-bg border border-border-strong rounded-lg px-3 py-2 text-[12.5px] font-mono outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50" />
+          <input type="password" placeholder="Mật khẩu của node" value={addKey} onChange={(e) => setAddKey(e.target.value)} className="w-full sm:w-40 bg-bg border border-border-strong rounded-lg px-3 py-2 text-[12.5px] font-mono outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50" />
+          <button onClick={addInst} disabled={!addUrl.trim() || !addKey.trim()} className="px-4 py-2 rounded-lg text-[12.5px] font-medium bg-surface-2 text-text border border-border hover:bg-border-strong transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0">Thêm</button>
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -2022,7 +1035,7 @@ function PageModels({
 // Main App
 // ---------------------------------------------------------------------------
 
-type Tab = "home" | "stats" | "models" | "logs" | "endpoints";
+type Tab = "home" | "stats" | "models" | "endpoints" | "logs";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("home");
@@ -2031,9 +1044,6 @@ export default function App() {
   const [stLoading, setStLoading] = useState(true);
   const [apiKey, setApiKey] = useState(() => localStorage.getItem("proxy_api_key") ?? "");
   const [showWizard, setShowWizard] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    openai: false, anthropic: false, gemini: false, openrouter: false,
-  });
   const [stats, setStats] = useState<Record<string, BackendStat> | null>(null);
   const [modelStats, setModelStats] = useState<Record<string, ModelStat> | null>(null);
   const [statsError, setStatsError] = useState<false | "auth" | "server">(false);
@@ -2046,7 +1056,6 @@ export default function App() {
 
   const baseUrl = window.location.origin;
   const displayUrl: string = (import.meta.env.VITE_BASE_URL as string | undefined) ?? window.location.origin;
-  const totalModels = OPENAI_MODELS.length + ANTHROPIC_MODELS.length + GEMINI_MODELS.length + OPENROUTER_MODELS.length;
 
   const checkHealth = useCallback(async () => {
     try {
@@ -2098,6 +1107,17 @@ export default function App() {
     } catch { setStatsError("auth"); }
   }, [baseUrl]);
 
+  const fetchModels = useCallback(async (key: string = apiKey) => {
+    if (!key) return;
+    try {
+      const r = await fetch(`${baseUrl}/api/v1/admin/models`, { headers: { Authorization: `Bearer ${key}` } });
+      if (!r.ok) return;
+      const d = await r.json();
+      setModelStatus(d.models ?? []);
+      setModelSummary(d.summary ?? {});
+    } catch {}
+  }, [baseUrl, apiKey]);
+
   const addBackend = async (e: React.FormEvent) => {
     e.preventDefault();
     const url = normalizeBackendUrl(addUrl);
@@ -2143,6 +1163,16 @@ export default function App() {
     fetchStats(apiKey);
   };
 
+  const batchRemoveBackends = async (labels: string[]) => {
+    await Promise.all(labels.map((l) =>
+      fetch(`${baseUrl}/api/v1/admin/backends/${l}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${apiKey}` },
+      })
+    ));
+    fetchStats(apiKey);
+  };
+
   const toggleRouting = async (field: "localEnabled" | "localFallback" | "fakeStream", value: boolean) => {
     setRouting((prev) => ({ ...prev, [field]: value }));
     try {
@@ -2154,19 +1184,7 @@ export default function App() {
     } catch {}
   };
 
-  const fetchModels = useCallback(async (key: string = apiKey) => {
-    if (!key) return;
-    try {
-      const r = await fetch(`${baseUrl}/api/v1/admin/models`, { headers: { Authorization: `Bearer ${key}` } });
-      if (!r.ok) return;
-      const d = await r.json();
-      setModelStatus(d.models ?? []);
-      setModelSummary(d.summary ?? {});
-    } catch {}
-  }, [baseUrl, apiKey]);
-
   const toggleModelProvider = async (provider: string, enabled: boolean) => {
-    // Optimistic update
     setModelStatus((prev) => prev.map((m) => m.provider === provider ? { ...m, enabled } : m));
     setModelSummary((prev) => {
       const grp = prev[provider];
@@ -2184,7 +1202,6 @@ export default function App() {
   };
 
   const toggleModelById = async (id: string, enabled: boolean) => {
-    // Optimistic update
     setModelStatus((prev) => prev.map((m) => m.id === id ? { ...m, enabled } : m));
     setModelSummary((prev) => {
       const m = modelStatus.find((ms) => ms.id === id);
@@ -2204,16 +1221,6 @@ export default function App() {
     fetchModels();
   };
 
-  const batchRemoveBackends = async (labels: string[]) => {
-    await Promise.all(labels.map((l) =>
-      fetch(`${baseUrl}/api/v1/admin/backends/${l}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${apiKey}` },
-      })
-    ));
-    fetchStats(apiKey);
-  };
-
   useEffect(() => {
     checkHealth();
     fetchSTMode();
@@ -2224,9 +1231,6 @@ export default function App() {
     return () => { clearInterval(iv1); clearInterval(iv2); };
   }, [checkHealth, fetchSTMode, fetchStats, fetchModels, apiKey]);
 
-  // Auto-show wizard only when server is NOT configured yet.
-  // Once PROXY_API_KEY is set server-side, wizard never pops up automatically.
-  // Uses sessionStorage so a manual dismiss stays dismissed for this tab's lifetime.
   useEffect(() => {
     if (sessionStorage.getItem("wizard_dismissed") === "1") return;
     fetch(`${baseUrl}/api/setup-status`)
@@ -2238,169 +1242,100 @@ export default function App() {
       .catch(() => {});
   }, [baseUrl]);
 
-  const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: "home", label: "Tổng quan", icon: "&#127968;" },
-    { id: "stats", label: "Thống kê", icon: "&#128200;" },
-    { id: "models", label: "Mô hình", icon: "&#129302;" },
-    { id: "logs", label: "Nhật ký", icon: "&#128203;" },
-    { id: "endpoints", label: "Tài liệu", icon: "&#128214;" },
+  const TABS = [
+    { id: "home" as Tab, label: "Tổng quan", icon: <Home className="w-4 h-4" /> },
+    { id: "stats" as Tab, label: "Thống kê", icon: <BarChart3 className="w-4 h-4" /> },
+    { id: "models" as Tab, label: "Mô hình", icon: <Boxes className="w-4 h-4" /> },
+    { id: "endpoints" as Tab, label: "Endpoints", icon: <Cable className="w-4 h-4" /> },
+    { id: "logs" as Tab, label: "Nhật ký", icon: <ScrollText className="w-4 h-4" /> },
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "hsl(222,47%,11%)", color: "#e2e8f0", fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div className="min-h-[100dvh] bg-bg flex font-sans text-text">
       {showWizard && (
         <SetupWizard
           baseUrl={baseUrl}
           onComplete={(key) => {
             sessionStorage.setItem("wizard_dismissed", "1");
             setShowWizard(false);
-            if (key) {
-              setApiKey(key);
-              localStorage.setItem("proxy_api_key", key);
-            }
+            if (key) { setApiKey(key); localStorage.setItem("proxy_api_key", key); }
           }}
           onDismiss={() => { sessionStorage.setItem("wizard_dismissed", "1"); setShowWizard(false); }}
         />
       )}
 
-      <UpdateBar baseUrl={baseUrl} apiKey={apiKey} />
-
-      <div style={{ maxWidth: "920px", margin: "0 auto", padding: "28px 24px 80px" }}>
-
-        {/* Header */}
-        <div style={{
-          marginBottom: "24px",
-          background: "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.06) 50%, rgba(59,130,246,0.04) 100%)",
-          border: "1px solid rgba(99,102,241,0.12)",
-          borderRadius: "16px", padding: "24px 28px",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "10px" }}>
-            <div style={{
-              width: "44px", height: "44px", borderRadius: "12px",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6, #3b82f6)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px",
-              boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
-            }}>&#9889;</div>
-            <div>
-              <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "#f1f5f9", letterSpacing: "-0.02em" }}>GPT ShopVN - Free API Gateway</h1>
-              <p style={{ color: "#64748b", margin: "2px 0 0", fontSize: "12.5px" }}>
-                AI Proxy Gateway · OpenAI / Anthropic / Gemini / OpenRouter
-              </p>
+      {/* Sidebar Navigation */}
+      <aside className="fixed inset-y-0 left-0 w-[240px] bg-surface border-r border-border flex flex-col z-10">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shadow-inner">
+              <Power className="w-4 h-4" />
             </div>
-            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-              <UpdateBadge baseUrl={baseUrl} apiKey={apiKey} />
-              <button onClick={() => setShowWizard(true)} style={{
-                padding: "6px 14px", background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))",
-                border: "1px solid rgba(99,102,241,0.3)", borderRadius: "100px",
-                color: "#a5b4fc", fontSize: "12px", fontWeight: 600, cursor: "pointer",
-                display: "flex", alignItems: "center", gap: "5px",
-                transition: "all 0.2s",
-              }}>&#128640; Trình cấu hình</button>
-              <div style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                background: online === null ? "rgba(100,116,139,0.15)" : online ? "rgba(74,222,128,0.1)" : "rgba(248,113,113,0.1)",
-                border: `1px solid ${online === null ? "rgba(100,116,139,0.3)" : online ? "rgba(74,222,128,0.25)" : "rgba(248,113,113,0.25)"}`,
-                borderRadius: "100px", padding: "5px 12px 5px 8px",
-              }}>
-                <div style={{
-                  width: "8px", height: "8px", borderRadius: "50%",
-                  background: online === null ? "#64748b" : online ? "#4ade80" : "#f87171",
-                  boxShadow: online ? "0 0 8px rgba(74,222,128,0.5)" : undefined,
-                  animation: online ? "pulse 2s infinite" : undefined,
-                }} />
-                <span style={{ fontSize: "12px", color: online === null ? "#64748b" : online ? "#4ade80" : "#f87171", fontWeight: 600 }}>
-                  {online === null ? "..." : online ? "Trực tuyến" : "Ngoại tuyến"}
-                </span>
-              </div>
+            <div>
+              <div className="font-bold text-[14px] text-text tracking-tight">GPT ShopVN</div>
+              <div className="text-[10px] text-text-subtle uppercase tracking-wider font-semibold">Free API Gateway</div>
             </div>
           </div>
         </div>
 
-        {/* Tab bar */}
-        <div style={{
-          display: "flex", gap: "2px", marginBottom: "24px",
-          background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.06)",
-          borderRadius: "12px", padding: "4px",
-          backdropFilter: "blur(8px)",
-        }}>
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              style={{
-                flex: 1, padding: "9px 8px", borderRadius: "8px", border: "none",
-                background: tab === t.id
-                  ? "linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.2))"
-                  : "transparent",
-                color: tab === t.id ? "#c7d2fe" : "#475569",
-                fontSize: "12.5px", fontWeight: tab === t.id ? 600 : 400,
-                cursor: "pointer", transition: "all 0.2s",
-                boxShadow: tab === t.id
-                  ? "inset 0 0 0 1px rgba(99,102,241,0.3), 0 2px 8px rgba(99,102,241,0.1)"
-                  : "none",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "5px",
-              }}
-            >
-              <span dangerouslySetInnerHTML={{ __html: t.icon }} style={{ fontSize: "13px" }} />
-              {t.label}
-            </button>
-          ))}
+        <nav className="flex-1 p-4 flex flex-col gap-1">
+          {TABS.map((t) => {
+            const active = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all group overflow-hidden",
+                  active ? "text-accent bg-accent/10" : "text-text-subtle hover:text-text hover:bg-surface-2"
+                )}
+              >
+                {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent rounded-r-full" />}
+                <span className={cn("transition-colors", active ? "text-accent" : "text-text-muted group-hover:text-text")}>{t.icon}</span>
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center justify-between mb-3 px-1">
+            <div className="flex items-center gap-2">
+              <div className={cn("w-2 h-2 rounded-full", online === null ? "bg-text-subtle" : online ? "bg-success" : "bg-danger")} />
+              <span className="text-[11px] font-semibold text-text-subtle">
+                {online === null ? "Đang kết nối..." : online ? "Trực tuyến" : "Ngoại tuyến"}
+              </span>
+            </div>
+          </div>
+          <UpdateBadge baseUrl={baseUrl} apiKey={apiKey} />
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 ml-[240px] max-w-[1200px] w-full px-8 py-10">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-text mb-1">{TABS.find(t => t.id === tab)?.label}</h1>
+            <p className="text-sm text-text-subtle m-0">Quản lý và giám sát API Gateway của bạn.</p>
+          </div>
+          <button 
+            onClick={() => setShowWizard(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-surface-2 hover:bg-border-strong text-text font-medium text-xs rounded-lg transition-colors border border-border"
+          >
+            <Settings className="w-3.5 h-3.5" /> Trợ lý cấu hình
+          </button>
         </div>
 
-        {/* Page content */}
-        {tab === "home" && (
-          <PageHome
-            displayUrl={displayUrl}
-            apiKey={apiKey}
-            setApiKey={setApiKey}
-            sillyTavernMode={sillyTavernMode}
-            stLoading={stLoading}
-            onToggleSTMode={toggleSTMode}
-          />
-        )}
-        {tab === "stats" && (
-          <PageStats
-            baseUrl={baseUrl}
-            apiKey={apiKey}
-            stats={stats}
-            statsError={statsError}
-            onRefresh={() => fetchStats(apiKey)}
-            addUrl={addUrl}
-            setAddUrl={setAddUrl}
-            addState={addState}
-            addMsg={addMsg}
-            onAddBackend={addBackend}
-            onRemoveBackend={removeBackend}
-            onToggleBackend={toggleBackend}
-            onBatchToggle={batchToggleBackends}
-            onBatchRemove={batchRemoveBackends}
-            routing={routing}
-            onToggleRouting={toggleRouting}
-            modelStats={modelStats}
-          />
-        )}
-        {tab === "models" && (
-          <PageModels
-            baseUrl={baseUrl}
-            apiKey={apiKey}
-            modelStatus={modelStatus}
-            summary={modelSummary}
-            onRefresh={() => fetchModels(apiKey)}
-            onToggleProvider={toggleModelProvider}
-            onToggleModel={toggleModelById}
-          />
-        )}
-        {tab === "logs" && (
-          <PageLogs baseUrl={baseUrl} apiKey={apiKey} />
-        )}
-        {tab === "endpoints" && (
-          <PageDocs />
-        )}
+        {tab === "home" && <PageHome displayUrl={displayUrl} apiKey={apiKey} setApiKey={setApiKey} sillyTavernMode={sillyTavernMode} stLoading={stLoading} onToggleSTMode={toggleSTMode} />}
+        {tab === "stats" && <PageStats baseUrl={baseUrl} apiKey={apiKey} stats={stats} statsError={statsError} onRefresh={() => fetchStats(apiKey)} addUrl={addUrl} setAddUrl={setAddUrl} addState={addState} addMsg={addMsg} onAddBackend={addBackend} onRemoveBackend={removeBackend} onToggleBackend={toggleBackend} onBatchToggle={batchToggleBackends} onBatchRemove={batchRemoveBackends} routing={routing} onToggleRouting={toggleRouting} modelStats={modelStats} />}
+        {tab === "models" && <PageModels baseUrl={baseUrl} apiKey={apiKey} modelStatus={modelStatus} summary={modelSummary} onRefresh={() => fetchModels(apiKey)} onToggleProvider={toggleModelProvider} onToggleModel={toggleModelById} />}
+        {tab === "endpoints" && <PageEndpoints baseUrl={baseUrl} />}
+        {tab === "logs" && <PageLogs baseUrl={baseUrl} apiKey={apiKey} />}
 
-        <div style={{ marginTop: "32px", textAlign: "center", color: "#1e293b", fontSize: "12px" }}>
-          Powered by Replit AI Integrations · OpenAI · Anthropic · Gemini · OpenRouter
+        <div className="mt-16 text-center text-[11px] text-text-subtle pb-8 font-mono">
+          Powered by Replit AI Integrations · Version 1.0
         </div>
-      </div>
+      </main>
     </div>
   );
 }

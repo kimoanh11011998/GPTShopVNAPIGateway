@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
+import { cn } from "../lib/utils";
 
 const SECTIONS = [
   {
@@ -149,44 +151,29 @@ export default function PageDocs() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-      <p style={{ color: "#64748b", fontSize: "13px", margin: "0 0 8px" }}>
+    <div className="flex flex-col gap-3">
+      <p className="text-text-muted text-sm mb-2">
         Toàn bộ thông tin kỹ thuật của AI Proxy Gateway này.
       </p>
-      {SECTIONS.map((sec, i) => (
-        <div key={i} style={{
-          background: "rgba(0,0,0,0.25)", borderRadius: "10px",
-          border: "1px solid rgba(255,255,255,0.06)",
-          overflow: "hidden",
-        }}>
-          <button
-            onClick={() => toggle(i)}
-            style={{
-              width: "100%", padding: "14px 16px",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              background: "none", border: "none", cursor: "pointer",
-              color: "#e2e8f0", fontSize: "14px", fontWeight: 600,
-              textAlign: "left",
-            }}
-          >
-            <span>{sec.title}</span>
-            <span style={{
-              transform: expanded.has(i) ? "rotate(90deg)" : "rotate(0deg)",
-              transition: "transform 0.2s", fontSize: "12px", color: "#64748b",
-            }}>&#9654;</span>
-          </button>
-          {expanded.has(i) && (
-            <div style={{
-              padding: "0 16px 16px",
-              color: "#94a3b8", fontSize: "13px", lineHeight: "1.8",
-              whiteSpace: "pre-wrap",
-              borderTop: "1px solid rgba(255,255,255,0.04)",
-            }}>
-              {sec.content}
-            </div>
-          )}
-        </div>
-      ))}
+      {SECTIONS.map((sec, i) => {
+        const isExpanded = expanded.has(i);
+        return (
+          <div key={i} className="bg-surface border border-border rounded-lg overflow-hidden transition-all duration-200">
+            <button
+              onClick={() => toggle(i)}
+              className="w-full px-4 py-3 flex items-center justify-between bg-transparent border-none cursor-pointer text-text text-sm font-semibold text-left hover:bg-surface-2 transition-colors"
+            >
+              <span>{sec.title}</span>
+              <ChevronRight className={cn("w-4 h-4 text-text-muted transition-transform duration-200", isExpanded && "rotate-90")} />
+            </button>
+            {isExpanded && (
+              <div className="px-4 pb-4 text-text-subtle text-sm leading-relaxed whitespace-pre-wrap border-t border-border mt-1 pt-3 font-mono">
+                {sec.content}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

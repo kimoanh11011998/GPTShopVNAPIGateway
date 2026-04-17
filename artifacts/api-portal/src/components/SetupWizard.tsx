@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Check, Copy, Bot, TerminalSquare } from "lucide-react";
+import { cn } from "../lib/utils";
 
 interface Props {
   baseUrl: string;
@@ -109,48 +111,23 @@ function CopyableBlock({ text }: { text: string }) {
   };
 
   return (
-    <div
-      style={{
-        background: "rgba(0,0,0,0.35)",
-        border: "1px solid rgba(99,102,241,0.3)",
-        borderRadius: "8px",
-        padding: "10px 12px",
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        marginTop: "8px",
-      }}
-    >
-      <span
-        style={{
-          flex: 1,
-          color: "#a5b4fc",
-          fontSize: "13px",
-          fontFamily: "Menlo, monospace",
-          lineHeight: "1.5",
-          whiteSpace: "pre-wrap",
-          userSelect: "all",
-        }}
-      >
+    <div className="bg-black/40 border border-border-strong rounded-lg p-3 flex flex-col gap-3 mt-3 shadow-inner">
+      <span className="flex-1 text-accent/90 text-xs font-mono leading-relaxed whitespace-pre-wrap select-all break-words max-h-48 overflow-y-auto pr-2 custom-scrollbar">
         {text}
       </span>
-      <button
-        onClick={copy}
-        style={{
-          padding: "5px 12px",
-          borderRadius: "6px",
-          border: `1px solid ${copied ? "rgba(74,222,128,0.4)" : "rgba(99,102,241,0.4)"}`,
-          background: copied ? "rgba(74,222,128,0.12)" : "rgba(99,102,241,0.15)",
-          color: copied ? "#4ade80" : "#818cf8",
-          fontSize: "11.5px",
-          fontWeight: 700,
-          cursor: "pointer",
-          flexShrink: 0,
-          transition: "all 0.2s",
-        }}
-      >
-        {copied ? "Đã sao chép ✓" : "Sao chép"}
-      </button>
+      <div className="flex justify-end">
+        <button
+          onClick={copy}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-[11px] font-semibold flex items-center gap-1.5 transition-all border",
+            copied
+              ? "bg-success/10 text-success border-success/40"
+              : "bg-surface-2 text-text hover:bg-border-strong border-border-strong"
+          )}
+        >
+          {copied ? <><Check className="w-3.5 h-3.5" /> Đã sao chép</> : <><Copy className="w-3.5 h-3.5" /> Sao chép prompt</>}
+        </button>
+      </div>
     </div>
   );
 }
@@ -302,7 +279,6 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
     [clearActions, addUser, addAgent, runCheck, onComplete, chosenKey]
   );
 
-  // ── Key input submit ────────────────────────────────────────────────────
   const handleKeySubmit = useCallback(async () => {
     const key = keyInputValue.trim();
     if (!key) return;
@@ -332,103 +308,56 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
   }, [keyInputValue, addUser, addAgent, checkSetupStatus]);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.8)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
-        backdropFilter: "blur(6px)",
-      }}
-    >
-      <div
-        style={{
-          background: "hsl(222,47%,12%)",
-          border: "1px solid rgba(99,102,241,0.25)",
-          borderRadius: "18px",
-          width: "100%",
-          maxWidth: "520px",
-          height: "min(640px, 88vh)",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
-          overflow: "hidden",
-        }}
-      >
+    <div className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-6 backdrop-blur-sm">
+      <div className="bg-surface border border-border-strong rounded-[16px] w-full max-w-[540px] h-[min(680px,90vh)] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
         {/* Header */}
-        <div
-          style={{
-            padding: "14px 18px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              width: "34px", height: "34px", borderRadius: "50%",
-              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "17px", flexShrink: 0,
-            }}
-          >🤖</div>
-          <div>
-            <div style={{ fontWeight: 700, color: "#f1f5f9", fontSize: "13.5px" }}>Trợ lý cấu hình</div>
-            <div style={{ fontSize: "11px", color: "#4ade80", display: "flex", alignItems: "center", gap: "4px" }}>
-              <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#4ade80" }} />
-              Trực tuyến
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between shrink-0 bg-surface-2/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+              <TerminalSquare className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-bold text-text text-[15px] m-0">Trợ lý cấu hình</h2>
+              <div className="text-[11px] text-success flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-success shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                Đang hoạt động
+              </div>
             </div>
           </div>
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="flex items-center gap-4">
             {checking && (
-              <span style={{ fontSize: "11px", color: "#6366f1", animation: "pulse 1.5s ease-in-out infinite" }}>
+              <span className="text-[11px] text-accent animate-pulse font-medium">
                 Đang kiểm tra…
               </span>
             )}
             <button
               onClick={onDismiss}
-              style={{ background: "none", border: "none", color: "#334155", fontSize: "20px", cursor: "pointer", lineHeight: 1, padding: "4px" }}
+              className="text-text-subtle hover:text-text text-2xl leading-none px-2 transition-colors"
             >×</button>
           </div>
         </div>
 
-        {/* Messages */}
-        <div
-          style={{
-            flex: 1, overflowY: "auto", padding: "16px",
-            display: "flex", flexDirection: "column", gap: "10px",
-          }}
-        >
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 custom-scrollbar">
           {messages.map((m) => (
-            <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-              <div style={{
-                display: "flex",
-                justifyContent: m.from === "agent" ? "flex-start" : "flex-end",
-                gap: "8px", alignItems: "flex-end",
-              }}>
+            <div key={m.id} className="flex flex-col gap-2.5">
+              <div className={cn(
+                "flex items-end gap-3",
+                m.from === "agent" ? "justify-start" : "justify-end"
+              )}>
                 {m.from === "agent" && (
-                  <div style={{
-                    width: "26px", height: "26px", borderRadius: "50%",
-                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "13px", flexShrink: 0,
-                  }}>🤖</div>
+                  <div className="w-8 h-8 rounded-full bg-surface-2 border border-border-strong flex items-center justify-center text-accent shrink-0 shadow-sm">
+                    <Bot className="w-4 h-4" />
+                  </div>
                 )}
-                <div style={{
-                  maxWidth: "86%",
-                  padding: "10px 13px",
-                  borderRadius: m.from === "agent" ? "4px 13px 13px 13px" : "13px 4px 13px 13px",
-                  background: m.from === "agent" ? "rgba(99,102,241,0.14)" : "rgba(74,222,128,0.1)",
-                  border: `1px solid ${m.from === "agent" ? "rgba(99,102,241,0.22)" : "rgba(74,222,128,0.18)"}`,
-                  color: m.from === "agent" ? "#cbd5e1" : "#a7f3d0",
-                  fontSize: "13.5px", lineHeight: "1.65", whiteSpace: "pre-line",
-                }}>
+                
+                <div className={cn(
+                  "max-w-[85%] p-3.5 text-[13px] leading-relaxed whitespace-pre-line shadow-sm border",
+                  m.from === "agent" 
+                    ? "rounded-[2px_16px_16px_16px] bg-surface-2 border-border-strong text-text" 
+                    : "rounded-[16px_2px_16px_16px] bg-accent/10 border-accent/20 text-accent"
+                )}>
                   {m.text}
                   {m.copyBlocks?.map((cb, i) => (
                     <CopyableBlock key={i} text={cb.text} />
@@ -437,21 +366,19 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
               </div>
 
               {m.actions && (
-                <div style={{ display: "flex", gap: "7px", flexWrap: "wrap", paddingLeft: "34px" }}>
+                <div className="flex gap-2 flex-wrap pl-11 mt-1">
                   {m.actions.map((a) => (
                     <button
                       key={a.value}
                       onClick={() => handleAction(a.value, a.label)}
                       disabled={checking}
-                      style={{
-                        padding: "6px 14px", borderRadius: "20px",
-                        border: `1px solid ${a.primary ? "rgba(99,102,241,0.55)" : "rgba(255,255,255,0.1)"}`,
-                        background: a.primary ? "rgba(99,102,241,0.18)" : "rgba(255,255,255,0.04)",
-                        color: a.primary ? "#a5b4fc" : "#64748b",
-                        fontSize: "12.5px", fontWeight: 600,
-                        cursor: checking ? "not-allowed" : "pointer",
-                        opacity: checking ? 0.5 : 1,
-                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-[12px] font-semibold transition-all border",
+                        a.primary
+                          ? "bg-accent/15 text-accent border-accent/30 hover:bg-accent/25 hover:border-accent/50"
+                          : "bg-surface-2 text-text-muted border-border hover:bg-border-strong hover:text-text",
+                        checking && "opacity-50 cursor-not-allowed pointer-events-none"
+                      )}
                     >{a.label}</button>
                   ))}
                 </div>
@@ -460,42 +387,27 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
           ))}
 
           {typing && (
-            <div style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}>
-              <div style={{
-                width: "26px", height: "26px", borderRadius: "50%",
-                background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "13px", flexShrink: 0,
-              }}>🤖</div>
-              <div style={{
-                padding: "10px 14px", borderRadius: "4px 13px 13px 13px",
-                background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.18)",
-                display: "flex", gap: "4px", alignItems: "center",
-              }}>
-                {[0, 1, 2].map((i) => (
-                  <div key={i} style={{
-                    width: "6px", height: "6px", borderRadius: "50%", background: "#6366f1",
-                    animation: `bounce 1s ease-in-out ${i * 0.15}s infinite`,
-                  }} />
-                ))}
+            <div className="flex items-end gap-3 animate-in fade-in">
+              <div className="w-8 h-8 rounded-full bg-surface-2 border border-border-strong flex items-center justify-center text-accent shrink-0 shadow-sm">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div className="p-4 rounded-[2px_16px_16px_16px] bg-surface-2 border border-border-strong flex gap-1.5 items-center shadow-sm h-[46px]">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-[bounce_1s_ease-in-out_infinite]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-[bounce_1s_ease-in-out_0.2s_infinite]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent/60 animate-[bounce_1s_ease-in-out_0.4s_infinite]" />
               </div>
             </div>
           )}
-          <div ref={bottomRef} />
+          <div ref={bottomRef} className="h-2" />
         </div>
 
-        {/* Footer — key input form or static hint */}
+        {/* Footer Area */}
         {keyInputStep ? (
-          <div style={{
-            padding: "12px 16px",
-            borderTop: "1px solid rgba(99,102,241,0.2)",
-            background: "rgba(99,102,241,0.06)",
-            flexShrink: 0,
-          }}>
-            <div style={{ fontSize: "11.5px", color: "#64748b", marginBottom: "8px" }}>
-              Đặt mật khẩu truy cập (chuỗi bất kỳ, ví dụ <code style={{ color: "#a78bfa" }}>my-secret-123</code>)
+          <div className="p-4 border-t border-border bg-surface-2/50 shrink-0">
+            <div className="text-[11px] text-text-muted mb-2 font-medium">
+              Đặt mật khẩu truy cập (chuỗi bất kỳ, ví dụ <code className="text-accent font-mono ml-1 px-1.5 py-0.5 bg-accent/10 rounded">my-secret-123</code>)
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex gap-2">
               <input
                 autoFocus
                 type="text"
@@ -503,57 +415,41 @@ export default function SetupWizard({ baseUrl, onComplete, onDismiss }: Props) {
                 onChange={(e) => setKeyInputValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleKeySubmit(); }}
                 placeholder="Nhập mật khẩu bạn muốn…"
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(99,102,241,0.35)",
-                  background: "rgba(0,0,0,0.3)",
-                  color: "#f1f5f9",
-                  fontSize: "13.5px",
-                  outline: "none",
-                  fontFamily: "Menlo, monospace",
-                }}
+                className="flex-1 px-3 py-2.5 rounded-lg border border-border-strong bg-bg text-text text-[13px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 font-mono transition-all"
               />
               <button
                 onClick={handleKeySubmit}
                 disabled={!keyInputValue.trim()}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(99,102,241,0.5)",
-                  background: keyInputValue.trim() ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.06)",
-                  color: keyInputValue.trim() ? "#a5b4fc" : "#334155",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  cursor: keyInputValue.trim() ? "pointer" : "not-allowed",
-                  flexShrink: 0,
-                  transition: "all 0.15s",
-                }}
+                className={cn(
+                  "px-5 py-2.5 rounded-lg text-[13px] font-bold transition-all border shrink-0 flex items-center gap-2",
+                  keyInputValue.trim() 
+                    ? "bg-accent text-accent-foreground border-accent hover:opacity-90 shadow-[0_0_15px_rgba(6,182,212,0.3)]" 
+                    : "bg-surface-2 text-text-muted border-border cursor-not-allowed"
+                )}
               >
-                Xác nhận →
+                Xác nhận
               </button>
             </div>
           </div>
         ) : (
-          <div style={{
-            padding: "10px 18px",
-            borderTop: "1px solid rgba(255,255,255,0.04)",
-            fontSize: "11px", color: "#1e293b", textAlign: "center", flexShrink: 0,
-          }}>
+          <div className="p-3 border-t border-border text-[11px] text-text-subtle text-center shrink-0 bg-bg">
             Toàn bộ cấu hình được thực hiện an toàn qua Replit Agent, khóa bí mật không đi qua trang này
           </div>
         )}
       </div>
-
       <style>{`
-        @keyframes bounce {
-          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-          40% { transform: translateY(-5px); opacity: 1; }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
         }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--color-border-strong);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: var(--color-text-subtle);
         }
       `}</style>
     </div>

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Download, Trash2, Wifi, WifiOff } from "lucide-react";
+import { cn } from "../lib/utils";
 
 interface LogEntry {
   id: number;
@@ -15,14 +17,6 @@ interface LogEntry {
   level: "info" | "warn" | "error";
   error?: string;
 }
-
-const LEVEL_COLORS: Record<string, string> = {
-  info: "#22c55e",
-  warn: "#f59e0b",
-  error: "#ef4444",
-};
-
-const STATUS_COLOR = (s: number) => s >= 500 ? "#ef4444" : s >= 400 ? "#f59e0b" : "#22c55e";
 
 export default function PageLogs({ baseUrl, apiKey }: { baseUrl: string; apiKey: string }) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -159,110 +153,110 @@ export default function PageLogs({ baseUrl, apiKey }: { baseUrl: string; apiKey:
 
   if (!apiKey) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 20px", color: "#64748b" }}>
-        <div style={{ fontSize: "40px", marginBottom: "12px" }}>&#128274;</div>
-        <div style={{ fontSize: "15px" }}>Vui lòng nhập Proxy Key ở trang Tổng quan trước</div>
+      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
+        <WifiOff className="w-12 h-12 mb-4 opacity-50" />
+        <p className="text-sm">Vui lòng nhập API Key ở trang Tổng quan để xem nhật ký</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        flexWrap: "wrap", gap: "10px",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{
-            width: "8px", height: "8px", borderRadius: "50%",
-            background: connected ? "#22c55e" : "#ef4444",
-            boxShadow: connected ? "0 0 8px #22c55e" : "none",
-          }} />
-          <span style={{ fontSize: "13px", color: connected ? "#22c55e" : "#ef4444" }}>
-            {connected ? "Đã kết nối" : connError ? `Lỗi kết nối: ${connError}` : "Đang kết nối lại..."}
-          </span>
+    <div className="flex flex-col h-full gap-4">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className={cn("w-2 h-2 rounded-full", connected ? "bg-success shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "bg-danger")} />
+            <span className={cn("text-xs font-semibold", connected ? "text-success" : "text-danger")}>
+              {connected ? "Đang theo dõi" : connError ? `Lỗi: ${connError}` : "Đang kết nối lại..."}
+            </span>
+          </div>
           {!connected && (
-            <button onClick={() => { retryCount.current = 0; setConnError(null); connectStream(); }} style={{
-              fontSize: "12px", padding: "4px 10px", borderRadius: "6px",
-              background: "rgba(99,102,241,0.2)", color: "#a5b4fc",
-              border: "1px solid rgba(99,102,241,0.3)", cursor: "pointer",
-            }}>Kết nối lại ngay</button>
+            <button
+              onClick={() => { retryCount.current = 0; setConnError(null); connectStream(); }}
+              className="text-xs px-2 py-1 rounded-md bg-accent/10 text-accent hover:bg-accent/20 transition-colors border border-accent/20"
+            >
+              Thử lại ngay
+            </button>
           )}
         </div>
 
-        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
           {(["all", "info", "warn", "error"] as const).map((lv) => (
             <button
               key={lv}
               onClick={() => setFilter(lv)}
-              style={{
-                fontSize: "11px", padding: "3px 10px", borderRadius: "12px",
-                border: "1px solid",
-                borderColor: filter === lv ? (LEVEL_COLORS[lv] ?? "#6366f1") : "rgba(255,255,255,0.1)",
-                background: filter === lv ? `${LEVEL_COLORS[lv] ?? "#6366f1"}22` : "transparent",
-                color: filter === lv ? (LEVEL_COLORS[lv] ?? "#a5b4fc") : "#64748b",
-                cursor: "pointer",
-              }}
+              className={cn(
+                "text-[11px] px-3 py-1 rounded-full uppercase font-medium tracking-wide transition-colors border",
+                filter === lv
+                  ? lv === "error" ? "bg-danger/10 text-danger border-danger/30"
+                  : lv === "warn" ? "bg-warning/10 text-warning border-warning/30"
+                  : lv === "info" ? "bg-success/10 text-success border-success/30"
+                  : "bg-accent/10 text-accent border-accent/30"
+                  : "bg-transparent text-text-muted border-border hover:bg-surface-2"
+              )}
             >
-              {lv === "all" ? "Tất cả" : lv.toUpperCase()}
+              {lv === "all" ? "Tất cả" : lv}
             </button>
           ))}
-          <label style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "#64748b", marginLeft: "8px", cursor: "pointer" }}>
-            <input type="checkbox" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} />
-            Tự động cuộn
+
+          <div className="w-[1px] h-4 bg-border mx-2" />
+
+          <label className="flex items-center gap-2 text-[11px] text-text-muted cursor-pointer hover:text-text select-none">
+            <input type="checkbox" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} className="accent-accent" />
+            Cuộn tự động
           </label>
-          <button onClick={downloadLogs} style={{
-            fontSize: "11px", padding: "3px 10px", borderRadius: "6px",
-            background: "rgba(255,255,255,0.05)", color: "#94a3b8",
-            border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer",
-          }}>Tải xuống</button>
-          <button onClick={() => setLogs([])} style={{
-            fontSize: "11px", padding: "3px 10px", borderRadius: "6px",
-            background: "rgba(239,68,68,0.1)", color: "#f87171",
-            border: "1px solid rgba(239,68,68,0.2)", cursor: "pointer",
-          }}>Xóa</button>
+
+          <button onClick={downloadLogs} className="flex items-center justify-center w-7 h-7 rounded-md bg-surface-2 text-text-subtle hover:text-text hover:bg-border-strong transition-colors border border-border" title="Tải xuống">
+            <Download className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setLogs([])} className="flex items-center justify-center w-7 h-7 rounded-md bg-danger/10 text-danger hover:bg-danger/20 transition-colors border border-danger/20" title="Xóa">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
+      {/* Log Viewer */}
       <div
         ref={scrollRef}
-        style={{
-          background: "rgba(0,0,0,0.4)", borderRadius: "12px",
-          border: "1px solid rgba(255,255,255,0.06)",
-          maxHeight: "500px", overflowY: "auto",
-          fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-          fontSize: "12px", lineHeight: "1.8",
-          padding: "12px 16px",
-        }}
+        className="flex-1 min-h-[400px] max-h-[600px] overflow-y-auto bg-[#0a0a0c] rounded-xl border border-border p-4 font-mono text-[12px] leading-relaxed"
       >
-        {filtered.length === 0 && (
-          <div style={{ textAlign: "center", color: "#475569", padding: "40px 0" }}>
-            {connected ? "Đang chờ nhật ký mới..." : connError ? "Kiểm tra lại API Key hoặc xem server đã cấu hình PROXY_API_KEY chưa" : "Đang thử kết nối đến server..."}
+        {filtered.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-text-subtle">
+            <p>{connected ? "Đang chờ request mới..." : connError ? "Lỗi kết nối. Vui lòng kiểm tra lại cấu hình." : "Đang kết nối đến server..."}</p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {filtered.map((l) => (
+              <div key={l.id} className="flex items-start sm:items-center gap-3 py-1 hover:bg-white/5 rounded px-1 transition-colors border-b border-white/[0.02] last:border-0 group">
+                <span className="text-text-subtle shrink-0 tabular-nums">{l.time.slice(11, 19)}</span>
+                <span className={cn(
+                  "w-12 shrink-0 font-semibold uppercase text-[10px] tracking-wider",
+                  l.level === "error" ? "text-danger" : l.level === "warn" ? "text-warning" : "text-success"
+                )}>
+                  {l.level}
+                </span>
+                <span className={cn(
+                  "w-12 shrink-0 font-bold",
+                  l.method === "GET" ? "text-success/80" : l.method === "POST" ? "text-accent/80" : "text-text-muted"
+                )}>{l.method}</span>
+                <span className="text-text truncate flex-1">{l.path}</span>
+                {l.model && <span className="text-accent/70 shrink-0 hidden sm:inline-block max-w-[150px] truncate">{l.model}</span>}
+                <span className={cn(
+                  "w-10 shrink-0 text-right tabular-nums",
+                  l.status >= 500 ? "text-danger" : l.status >= 400 ? "text-warning" : "text-success"
+                )}>{l.status}</span>
+                <span className="w-16 shrink-0 text-right text-text-subtle tabular-nums">{l.duration}ms</span>
+                {l.stream ? <span className="w-8 shrink-0 text-right text-accent/50 text-[10px]">SSE</span> : <span className="w-8 shrink-0" />}
+              </div>
+            ))}
           </div>
         )}
-        {filtered.map((l) => (
-          <div key={l.id} style={{
-            display: "flex", gap: "8px", padding: "2px 0",
-            borderBottom: "1px solid rgba(255,255,255,0.03)",
-          }}>
-            <span style={{ color: "#475569", flexShrink: 0 }}>{l.time.slice(11, 19)}</span>
-            <span style={{ color: LEVEL_COLORS[l.level], fontWeight: 600, width: "40px", flexShrink: 0 }}>
-              {l.level.toUpperCase()}
-            </span>
-            <span style={{ color: "#94a3b8", flexShrink: 0 }}>{l.method}</span>
-            <span style={{ color: "#cbd5e1", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {l.path}
-            </span>
-            {l.model && <span style={{ color: "#818cf8", flexShrink: 0 }}>{l.model}</span>}
-            <span style={{ color: STATUS_COLOR(l.status), flexShrink: 0 }}>{l.status}</span>
-            <span style={{ color: "#64748b", flexShrink: 0 }}>{l.duration}ms</span>
-            {l.stream && <span style={{ color: "#6366f1", fontSize: "10px", flexShrink: 0 }}>SSE</span>}
-          </div>
-        ))}
       </div>
 
-      <div style={{ fontSize: "11px", color: "#475569", textAlign: "right" }}>
-        Hiển thị {filtered.length} mục / Tổng {logs.length} mục
+      <div className="flex justify-between items-center text-[11px] text-text-subtle">
+        <span>Hiển thị {filtered.length} / {logs.length} dòng</span>
+        <span>Lưu tối đa 200 dòng mới nhất</span>
       </div>
     </div>
   );
