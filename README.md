@@ -8,7 +8,7 @@
 [![Version](https://img.shields.io/badge/version-1.0-6366f1?style=flat-square)](./version.json)
 [![License](https://img.shields.io/badge/license-MIT-10b981?style=flat-square)](./LICENSE)
 [![Demo](https://img.shields.io/badge/Demo-Trực%20tuyến-10b981?style=flat-square)](https://replit-2-api-kimoanh11011998.replit.app)
-[![GitHub](https://img.shields.io/badge/GitHub-GPTShopVN-24292e?style=flat-square&logo=github)](https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-)
+[![GitHub](https://img.shields.io/badge/GitHub-GPTShopVN-24292e?style=flat-square&logo=github)](https://github.com/kimoanh11011998/GPTShopVnAPIGateway)
 
 ---
 
@@ -19,7 +19,7 @@
 Trong Replit, tạo Repl mới → chọn **"Import from GitHub"** → dán link sau:
 
 ```
-https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-
+https://github.com/kimoanh11011998/GPTShopVnAPIGateway
 ```
 
 Hoặc mở hộp chat **Replit Agent** và dán đúng đoạn sau:
@@ -29,7 +29,7 @@ Hoặc mở hộp chat **Replit Agent** và dán đúng đoạn sau:
 **AGENT SETUP PROMPT — copy toàn bộ đoạn dưới và dán vào Replit Agent:**
 
 ```
-Hãy triển khai dự án AI Gateway từ GitHub này: https://github.com/kimoanh11011998/ReplitAPI-GPT-ShopVn-
+Hãy triển khai dự án AI Gateway từ GitHub này: https://github.com/kimoanh11011998/GPTShopVnAPIGateway
 
 Làm theo đúng thứ tự sau:
 
