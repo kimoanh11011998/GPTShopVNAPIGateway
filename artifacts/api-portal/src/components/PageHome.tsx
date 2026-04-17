@@ -26,10 +26,10 @@ export default function PageHome({
       <Card variant="hero" className="text-center py-12 relative overflow-hidden flex flex-col items-center">
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50" />
         <h1 className="text-3xl md:text-4xl font-bold font-heading text-text mb-4">
-          One unified AI Gateway for Replit users
+          One endpoint for all your AI models
         </h1>
         <p className="text-text-muted text-[15px] max-w-2xl mx-auto mb-8 leading-relaxed">
-          API Gateway hợp nhất dành cho người dùng Replit. Tích hợp OpenAI, Anthropic, Gemini và OpenRouter vào một điểm truy cập duy nhất, không cần mang theo API Key riêng.
+          Access OpenAI-compatible and native AI endpoints through a single streamlined gateway.
         </p>
         
         <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
@@ -42,25 +42,25 @@ export default function PageHome({
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
-          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">4 Nhà cung cấp</span>
+          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">Multi-provider</span>
           <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">OpenAI-compatible</span>
-          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">Native Claude + Gemini</span>
-          <span className="text-[11px] font-semibold text-accent/80 uppercase tracking-wider bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20">Dùng Replit AI Credits</span>
+          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">Native endpoints</span>
+          <span className="text-[11px] font-semibold text-accent/80 uppercase tracking-wider bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20">Unified access</span>
         </div>
       </Card>
 
       {/* 2. Quick Start */}
       <section>
-        <SectionTitle>Bắt đầu nhanh (Quick Start)</SectionTitle>
+        <SectionTitle>Bắt đầu nhanh</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card variant="standard" className="relative group hover:border-accent/30 transition-colors">
             <div className="absolute top-4 right-4 text-text-subtle/20 font-heading text-4xl font-bold">1</div>
             <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-4">
               <PlayCircle className="w-5 h-5" />
             </div>
-            <h3 className="font-semibold text-text text-sm mb-2">Chạy Setup Wizard</h3>
+            <h3 className="font-semibold text-text text-sm mb-2">Chạy trợ lý cấu hình</h3>
             <p className="text-text-muted text-xs leading-relaxed">
-              Hoàn tất cấu hình ban đầu qua Replit Agent để thiết lập mật khẩu truy cập và tích hợp AI.
+              Hoàn tất cấu hình ban đầu để thiết lập mật khẩu truy cập và kích hoạt các tích hợp AI.
             </p>
           </Card>
           <Card variant="standard" className="relative group hover:border-accent/30 transition-colors">
@@ -68,9 +68,9 @@ export default function PageHome({
             <div className="w-10 h-10 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center text-success mb-4">
               <Globe className="w-5 h-5" />
             </div>
-            <h3 className="font-semibold text-text text-sm mb-2">Publish Replit App</h3>
+            <h3 className="font-semibold text-text text-sm mb-2">Phát hành ứng dụng</h3>
             <p className="text-text-muted text-xs leading-relaxed">
-              Phát hành ứng dụng của bạn ra môi trường public để có một URL cố định, luôn hoạt động.
+              Đưa ứng dụng lên môi trường public để có một URL cố định, luôn hoạt động.
             </p>
           </Card>
           <Card variant="standard" className="relative group hover:border-accent/30 transition-colors">
@@ -78,9 +78,9 @@ export default function PageHome({
             <div className="w-10 h-10 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center text-warning mb-4">
               <Copy className="w-5 h-5" />
             </div>
-            <h3 className="font-semibold text-text text-sm mb-2">Tích hợp vào Client</h3>
+            <h3 className="font-semibold text-text text-sm mb-2">Tích hợp vào ứng dụng</h3>
             <p className="text-text-muted text-xs leading-relaxed">
-              Sao chép Base URL và API Key vào ứng dụng hoặc công cụ yêu thích của bạn.
+              Sao chép Base URL và API Key vào ứng dụng hoặc công cụ bạn đang dùng.
             </p>
           </Card>
         </div>
@@ -145,17 +145,37 @@ export default function PageHome({
         <SectionTitle>Nhà cung cấp hỗ trợ</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { id: "openai", name: "OpenAI", color: "from-emerald-500/10 to-transparent", border: "border-emerald-500/20", badge: "GPT-4o, o3-mini" },
-            { id: "anthropic", name: "Anthropic", color: "from-amber-500/10 to-transparent", border: "border-amber-500/20", badge: "Claude 3.7 Sonnet" },
-            { id: "gemini", name: "Google Gemini", color: "from-blue-500/10 to-transparent", border: "border-blue-500/20", badge: "Gemini 2.5 Pro" },
-            { id: "openrouter", name: "OpenRouter", color: "from-purple-500/10 to-transparent", border: "border-purple-500/20", badge: "DeepSeek, Llama" },
+            {
+              id: "openai", name: "OpenAI",
+              color: "from-emerald-500/10 to-transparent", border: "border-emerald-500/20",
+              badge: "Latest models",
+              desc: "Hỗ trợ các mô hình hàng đầu với tool calling, vision, streaming và định dạng tương thích OpenAI.",
+            },
+            {
+              id: "anthropic", name: "Anthropic",
+              color: "from-amber-500/10 to-transparent", border: "border-amber-500/20",
+              badge: "Reasoning + tools",
+              desc: "Hỗ trợ Claude native, extended thinking, tool use và streaming cho các tác vụ hội thoại và agent.",
+            },
+            {
+              id: "gemini", name: "Google Gemini",
+              color: "from-blue-500/10 to-transparent", border: "border-blue-500/20",
+              badge: "Native support",
+              desc: "Hỗ trợ Gemini native, multimodal input, streaming và chuyển đổi linh hoạt giữa các định dạng request.",
+            },
+            {
+              id: "openrouter", name: "OpenRouter",
+              color: "from-purple-500/10 to-transparent", border: "border-purple-500/20",
+              badge: "Broad model access",
+              desc: "Mở rộng truy cập tới nhiều mô hình từ nhiều nhà cung cấp qua một lớp gateway thống nhất.",
+            },
           ].map((p) => (
             <div key={p.id} className={cn("rounded-xl border p-5 bg-gradient-to-br relative overflow-hidden", p.color, p.border)}>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between gap-3 mb-2">
                 <h3 className="font-bold text-text text-base font-heading">{p.name}</h3>
-                <span className="text-[10px] font-mono px-2 py-1 rounded bg-surface/50 border border-border text-text-muted">{p.badge}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded bg-surface/50 border border-border text-text-muted shrink-0">{p.badge}</span>
               </div>
-              <p className="text-[12px] text-text-subtle mb-4">Hỗ trợ đầy đủ Tool Calling, Vision, Streaming. Tự động chuyển đổi định dạng OpenAI sang native.</p>
+              <p className="text-[12px] text-text-subtle leading-relaxed m-0">{p.desc}</p>
             </div>
           ))}
         </div>
@@ -221,10 +241,30 @@ export default function PageHome({
         <Card variant="compact" className="border-accent/10 flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-surface/50 backdrop-blur-[2px] z-0" />
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent z-0" />
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col items-center">
             <div className="text-[10px] uppercase tracking-widest text-text-subtle font-bold mb-2">Tài trợ</div>
-            <h3 className="font-heading font-bold text-lg text-text mb-1">GPT ShopVN</h3>
-            <p className="text-[12px] text-text-muted">Giải pháp API Gateway tự lưu trữ miễn phí.</p>
+            <h3 className="font-heading font-bold text-lg text-text mb-1">GPTShopVN</h3>
+            <p className="text-[12px] text-text-muted leading-relaxed mb-4 max-w-xs">
+              Không để chi phí cao thành rào cản sử dụng AI cho người Việt.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <a
+                href="https://t.me/OdaybanChatGPT_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 text-[12px] font-semibold text-text bg-surface-2 border border-border rounded-md hover:border-accent/40 hover:text-accent transition-colors"
+              >
+                Telegram Bot
+              </a>
+              <a
+                href="https://zalo.me/g/a7lgs7lvpw5wnr38ksnh"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 text-[12px] font-semibold text-text bg-surface-2 border border-border rounded-md hover:border-accent/40 hover:text-accent transition-colors"
+              >
+                Zalo Group
+              </a>
+            </div>
           </div>
         </Card>
       </div>
