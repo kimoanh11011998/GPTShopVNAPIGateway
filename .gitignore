@@ -1,0 +1,76 @@
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# Replit
+.cache/
+.local/
+
+# Runtime data — do not commit
+artifacts/api-server/dynamic_backends.json
+artifacts/api-server/server_settings.json
+artifacts/api-server/disabled_models.json
+artifacts/api-server/data_dev/
+
+# Root-level runtime files (safety net if CWD differs at runtime)
+server_settings.json
+disabled_models.json
+dynamic_backends.json
+
+# Replit chat attachments & scratch assets — not part of source code
+attached_assets/
+assets/
+
+# Replit internal agent tracking
+.agents/
+
+# Internal development docs — not for public users
+docs/
+
+# Canvas design tool — kept on disk for Replit Canvas, excluded from repo
+artifacts/mockup-sandbox/
+
+# Vite / build cache
+artifacts/*/dist/

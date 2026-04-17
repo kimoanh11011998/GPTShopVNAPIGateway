@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "GPT ShopVN - Free API Gateway",
+  "releaseDate": "2026-04-17",
+  "releaseNotes": "v.1 — Ban dau tien GPT ShopVN: 19 Claude models verified, 4 auth methods, OpenAI/Anthropic/Gemini native endpoints"
+}
