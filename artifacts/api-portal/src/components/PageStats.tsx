@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { RefreshCw, Trash2, AlertCircle, Plus } from "lucide-react";
+import { RefreshCw, Trash2, AlertCircle, Plus, Wallet, Activity, AlertTriangle, Zap, Server, Coins, Database, Radio, Info, Settings2, Inbox } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Card, SectionTitle, getModelPrice, estimateModelCost, DEFAULT_PRICING } from "./Shared";
 
@@ -285,40 +285,60 @@ export default function PageStats({
       {(() => {
         const used = overallCost;
         const cap = budgetCap;
-        const ratio = cap && cap > 0 ? Math.min(used / cap, 1) : 0;
-        const pct = cap && cap > 0 ? (used / cap) * 100 : 0;
-        const barColor = !cap ? "bg-border" : pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "bg-success";
-        const textColor = !cap ? "text-text-muted" : pct >= 90 ? "text-danger" : pct >= 70 ? "text-warning" : "text-success";
+        const hasCap = cap !== null && cap > 0;
+        const ratio = hasCap ? Math.min(used / cap!, 1) : 0;
+        const pct = hasCap ? (used / cap!) * 100 : 0;
+        const barColor = !hasCap ? "bg-text-subtle/30" : pct >= 90 ? "bg-gradient-to-r from-danger/80 to-danger" : pct >= 70 ? "bg-gradient-to-r from-warning/80 to-warning" : "bg-gradient-to-r from-success/70 to-accent";
+        const accentColor = !hasCap ? "text-text-muted" : pct >= 90 ? "text-danger" : pct >= 70 ? "text-warning" : "text-success";
+        const iconBgColor = !hasCap ? "bg-surface-2 border-border" : pct >= 90 ? "bg-danger/10 border-danger/30" : pct >= 70 ? "bg-warning/10 border-warning/30" : "bg-success/10 border-success/30";
         return (
-          <Card variant="standard">
-            <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-              <div>
-                <SectionTitle>Hạn mức ngân sách</SectionTitle>
-                <div className="text-sm text-text-muted mt-2">
-                  Đã dùng <span className="font-mono font-semibold text-text">${used.toFixed(4)}</span>
-                  {cap !== null && cap > 0 && (
-                    <> / <span className="font-mono font-semibold text-text">${cap.toFixed(2)}</span> <span className={textColor}>({pct.toFixed(1)}%)</span></>
+          <Card variant="standard" className="relative overflow-hidden">
+            {hasCap && pct >= 70 && (
+              <div className={cn("absolute top-0 inset-x-0 h-px", pct >= 90 ? "bg-gradient-to-r from-transparent via-danger to-transparent" : "bg-gradient-to-r from-transparent via-warning to-transparent")} />
+            )}
+            <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0", iconBgColor)}>
+                  <Wallet className={cn("w-5 h-5", accentColor)} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-bold text-text-subtle tracking-[0.1em] uppercase font-heading mb-0.5">Hạn mức ngân sách</div>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-2xl sm:text-[28px] font-mono font-bold text-text leading-none">${used.toFixed(4)}</span>
+                    {hasCap && (
+                      <span className="text-sm text-text-subtle font-mono">/ ${cap!.toFixed(2)}</span>
+                    )}
+                    {hasCap && (
+                      <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full border", accentColor, pct >= 90 ? "bg-danger/10 border-danger/20" : pct >= 70 ? "bg-warning/10 border-warning/20" : "bg-success/10 border-success/20")}>
+                        {pct.toFixed(1)}%
+                      </span>
+                    )}
+                  </div>
+                  {!hasCap && (
+                    <div className="text-[12px] text-text-subtle mt-1">Chưa đặt giới hạn — chi phí sẽ chạy không giới hạn.</div>
                   )}
-                  {(cap === null || cap === 0) && <span className="text-text-subtle"> · Chưa đặt giới hạn</span>}
                 </div>
               </div>
               {!budgetEditing ? (
                 <button
                   onClick={() => { setBudgetInput(cap ? String(cap) : ""); setBudgetEditing(true); }}
-                  className="px-3 py-1.5 text-xs font-semibold border border-border hover:border-accent hover:text-accent rounded-md transition"
+                  className={cn(
+                    "px-4 py-2 text-xs font-semibold rounded-lg transition border shrink-0",
+                    hasCap
+                      ? "bg-surface-2 text-text border-border hover:border-accent/50 hover:text-accent"
+                      : "bg-accent/10 text-accent border-accent/30 hover:bg-accent/20"
+                  )}
                 >
-                  {cap ? "Sửa hạn mức" : "Đặt hạn mức"}
+                  {hasCap ? "Sửa hạn mức" : "+ Đặt hạn mức"}
                 </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <input
-                    type="number"
-                    min="0"
-                    step="0.01"
+                    type="number" min="0" step="0.01"
                     placeholder="USD (0 = bỏ giới hạn)"
                     value={budgetInput}
                     onChange={(e) => setBudgetInput(e.target.value)}
-                    className="px-2 py-1.5 text-xs font-mono bg-bg border border-border focus:border-accent focus:outline-none rounded-md w-44"
+                    className="px-3 py-2 text-xs font-mono bg-bg border border-border focus:border-accent focus:outline-none rounded-md w-44"
                     autoFocus
                   />
                   <button
@@ -328,25 +348,28 @@ export default function PageStats({
                       if (budgetInput === "" || isNaN(v) || v <= 0) saveBudget(null);
                       else saveBudget(v);
                     }}
-                    className="px-3 py-1.5 text-xs font-semibold bg-accent text-accent-foreground rounded-md disabled:opacity-50"
+                    className="px-3 py-2 text-xs font-semibold bg-accent text-accent-foreground rounded-md disabled:opacity-50"
                   >Lưu</button>
                   <button
                     onClick={() => setBudgetEditing(false)}
-                    className="px-3 py-1.5 text-xs font-semibold border border-border rounded-md hover:bg-surface-2"
+                    className="px-3 py-2 text-xs font-semibold border border-border rounded-md hover:bg-surface-2"
                   >Hủy</button>
                 </div>
               )}
             </div>
-            <div className="h-2 bg-bg rounded-full overflow-hidden border border-border mt-3">
-              <div className={cn("h-full transition-all", barColor)} style={{ width: `${ratio * 100}%` }} />
+            <div className="h-3 bg-bg rounded-full overflow-hidden border border-border relative">
+              <div className={cn("h-full transition-all duration-500 rounded-full", barColor)} style={{ width: `${hasCap ? ratio * 100 : 100}%`, opacity: hasCap ? 1 : 0.15 }} />
             </div>
-            {cap !== null && cap > 0 && pct >= 70 && (
-              <div className={cn("mt-2 text-xs", textColor)}>
-                {pct >= 100
-                  ? `Đã vượt hạn mức ${(used - cap).toFixed(4)} USD`
-                  : pct >= 90
-                  ? `Cảnh báo: sắp chạm hạn mức, còn $${(cap - used).toFixed(4)}`
-                  : `Đã dùng hơn 70% hạn mức, còn $${(cap - used).toFixed(4)}`}
+            {hasCap && pct >= 70 && (
+              <div className={cn("mt-3 flex items-start gap-2 text-xs px-3 py-2 rounded-md border", pct >= 90 ? "bg-danger/5 border-danger/20 text-danger" : "bg-warning/5 border-warning/20 text-warning")}>
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span>
+                  {pct >= 100
+                    ? `Đã vượt hạn mức $${(used - cap!).toFixed(4)}.`
+                    : pct >= 90
+                    ? `Sắp chạm hạn mức, còn $${(cap! - used).toFixed(4)}.`
+                    : `Đã dùng hơn 70% hạn mức, còn $${(cap! - used).toFixed(4)}.`}
+                </span>
               </div>
             )}
           </Card>
@@ -354,18 +377,38 @@ export default function PageStats({
       })()}
 
       {/* Top KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+        {/* Primary metric — spans 2 cols, larger */}
+        <div className="col-span-2 lg:col-span-2 relative rounded-xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] via-surface to-surface p-5 overflow-hidden shadow-[0_0_30px_-15px_rgba(20,184,166,0.4)]">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shrink-0">
+              <Activity className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold text-accent/80 tracking-[0.1em] uppercase font-heading mb-1">Tổng số gọi</div>
+              <div className="text-3xl md:text-[34px] font-mono font-bold text-text leading-none">{fmt(totals.calls)}</div>
+              <div className="text-[11px] text-text-subtle mt-2 font-mono">
+                <span className="text-success">{fmt(totals.calls - totals.errors)}</span> thành công · <span className="text-danger">{fmt(totals.errors)}</span> lỗi
+              </div>
+            </div>
+          </div>
+        </div>
+
         {[
-          { label: "Tổng số gọi", value: fmt(totals.calls) },
-          { label: "Lỗi", value: fmt(totals.errors) },
-          { label: "Tổng Tokens", value: fmt(totals.totalTokens) },
-          { label: "Số Node", value: allSubNodes.length.toString() },
-          { label: "Chi phí ước tính", value: `$${overallCost.toFixed(4)}` },
-          { label: "Gọi streaming", value: fmt(totals.streamingCalls) }
+          { label: "Chi phí ước tính", value: `$${overallCost.toFixed(4)}`, icon: <Coins className="w-4 h-4" />, color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+          { label: "Tổng tokens", value: fmt(totals.totalTokens), icon: <Database className="w-4 h-4" />, color: "text-text-muted", bg: "bg-surface-2", border: "border-border" },
+          { label: "Streaming", value: fmt(totals.streamingCalls), icon: <Radio className="w-4 h-4" />, color: "text-accent", bg: "bg-accent/10", border: "border-accent/20" },
+          { label: "Số Node", value: allSubNodes.length.toString(), icon: <Server className="w-4 h-4" />, color: "text-text-muted", bg: "bg-surface-2", border: "border-border" },
         ].map((kpi, i) => (
-          <Card key={i} variant="compact" className="p-5 flex flex-col justify-center items-center text-center">
-            <div className="text-[10px] font-bold text-text-subtle tracking-[0.1em] uppercase mb-2 font-heading">{kpi.label}</div>
-            <div className="text-xl md:text-2xl font-mono font-semibold text-text">{kpi.value}</div>
+          <Card key={i} variant="compact" className="p-4 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div className={cn("w-7 h-7 rounded-lg border flex items-center justify-center shrink-0", kpi.bg, kpi.border, kpi.color)}>
+                {kpi.icon}
+              </div>
+              <div className="text-[10px] font-bold text-text-subtle tracking-[0.1em] uppercase font-heading truncate">{kpi.label}</div>
+            </div>
+            <div className="text-lg md:text-xl font-mono font-semibold text-text leading-tight">{kpi.value}</div>
           </Card>
         ))}
       </div>
@@ -385,26 +428,33 @@ export default function PageStats({
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Nodes Table */}
           <Card variant="standard">
-            <div className="flex items-center justify-between mb-4">
-              <SectionTitle>Danh sách Node</SectionTitle>
-              <button onClick={onRefresh} className="p-1.5 text-text-subtle hover:text-text rounded-md hover:bg-surface-2 transition-colors border border-transparent hover:border-border">
+            <div className="flex items-center justify-between mb-4 gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <SectionTitle>Danh sách Node</SectionTitle>
+                {allSubNodes.length > 0 && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border text-text-muted shrink-0">
+                    {allSubNodes.length}
+                  </span>
+                )}
+              </div>
+              <button onClick={onRefresh} className="p-1.5 text-text-subtle hover:text-text rounded-md hover:bg-surface-2 transition-colors border border-transparent hover:border-border shrink-0">
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
-            
+
             {/* Add inline form */}
-            <form onSubmit={onAddBackend} className="flex gap-2 mb-4">
+            <form onSubmit={onAddBackend} className="flex flex-col sm:flex-row gap-2 mb-3">
               <input
                 type="url" value={addUrl} onChange={(e) => setAddUrl(e.target.value)}
                 placeholder="https://node-url.replit.app"
-                className="flex-1 bg-bg border border-border-strong rounded-lg px-3 py-2 text-text font-mono text-[13px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
+                className="flex-1 bg-bg border border-border-strong rounded-lg px-3 py-2.5 text-text font-mono text-[13px] outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
               />
-              <button type="submit" disabled={addState === "loading"} className="px-4 py-2 bg-surface-2 hover:bg-border-strong text-text font-medium text-[13px] rounded-lg transition-colors border border-border flex items-center gap-2 shrink-0">
+              <button type="submit" disabled={addState === "loading"} className="px-4 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent font-medium text-[13px] rounded-lg transition-colors border border-accent/30 flex items-center justify-center gap-2 shrink-0">
                 <Plus className="w-4 h-4" /> Thêm Node
               </button>
             </form>
-            {addState === "ok" && <p className="text-[11.5px] text-success m-0 mb-3">{addMsg}</p>}
-            {addState === "err" && <p className="text-[11.5px] text-danger m-0 mb-3">{addMsg}</p>}
+            {addState === "ok" && <p className="text-[11.5px] text-success m-0 mb-3 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-success" /> {addMsg}</p>}
+            {addState === "err" && <p className="text-[11.5px] text-danger m-0 mb-3 flex items-center gap-1.5"><AlertCircle className="w-3 h-3" /> {addMsg}</p>}
 
             {allSubNodes.length > 0 && (
               <div className="mb-4 flex items-center gap-3">
@@ -461,7 +511,19 @@ export default function PageStats({
                 </thead>
                 <tbody className="text-[13px] font-mono">
                   {allSubNodes.length === 0 ? (
-                    <tr><td colSpan={7} className="py-6 text-center text-text-subtle text-xs font-sans">Chưa có node con nào</td></tr>
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center font-sans">
+                        <div className="flex flex-col items-center gap-2 text-text-subtle">
+                          <div className="w-12 h-12 rounded-full bg-surface-2 border border-border flex items-center justify-center mb-1">
+                            <Inbox className="w-5 h-5 opacity-60" />
+                          </div>
+                          <div className="text-[13px] font-semibold text-text-muted">Chưa có node con nào</div>
+                          <div className="text-[11.5px] max-w-[280px] leading-relaxed">
+                            Thêm URL node ở phía trên hoặc cấu hình qua biến môi trường để node tồn tại sau khi Publish.
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
                   ) : allSubNodes.map(([label, s]) => (
                     <tr key={label} className="border-b border-border last:border-0 hover:bg-surface-2 transition-colors">
                       <td className="p-3">
@@ -504,10 +566,17 @@ export default function PageStats({
               </table>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-border">
-              <div className="text-[12.5px] text-text font-semibold mb-2">Thêm qua biến môi trường (node vĩnh viễn)</div>
-              <div className="text-[11.5px] text-text-subtle leading-relaxed mb-3">
-                ENV node được lưu vào Secrets, không mất sau khi Publish. Gửi nội dung bên dưới cho Replit Agent để tự động hoàn tất cấu hình.
+            <div className="mt-6 rounded-xl border border-border-strong bg-gradient-to-br from-surface-2/40 to-bg/40 p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 text-accent flex items-center justify-center shrink-0">
+                  <Info className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[12.5px] text-text font-semibold">Thêm qua biến môi trường (node vĩnh viễn)</div>
+                  <div className="text-[11.5px] text-text-subtle leading-relaxed mt-0.5">
+                    ENV node được lưu vào Secrets, không mất sau khi Publish. Sao chép prompt và gửi cho Replit Agent.
+                  </div>
+                </div>
               </div>
               <div className="bg-[#030712] border border-border-strong rounded-lg p-3 flex items-start gap-3 group shadow-inner">
                 <span className="flex-1 text-accent/80 text-[11px] font-mono leading-relaxed whitespace-pre-wrap select-all break-all h-20 overflow-y-auto custom-scrollbar pr-2">
@@ -516,9 +585,9 @@ export default function PageStats({
                 <button
                   onClick={copyEnvPrompt}
                   className={cn(
-                    "shrink-0 px-2 py-1.5 rounded border text-[11px] font-semibold transition-all",
-                    envPromptCopied 
-                      ? "bg-success/10 text-success border-success/30" 
+                    "shrink-0 px-2.5 py-1.5 rounded border text-[11px] font-semibold transition-all",
+                    envPromptCopied
+                      ? "bg-success/10 text-success border-success/30"
                       : "bg-surface-2 text-text hover:bg-border-strong border-border-strong"
                   )}
                 >
@@ -534,32 +603,62 @@ export default function PageStats({
         <div className="flex flex-col gap-6">
           {/* Routing Settings */}
           <Card variant="standard">
-            <SectionTitle>Routing</SectionTitle>
-            <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 text-accent flex items-center justify-center shrink-0">
+                <Settings2 className="w-3.5 h-3.5" />
+              </div>
+              <SectionTitle>Bảng điều khiển Routing</SectionTitle>
+            </div>
+            <div className="flex flex-col gap-2.5">
               {[
-                { field: "localEnabled" as const, label: "Bật backend cục bộ", desc: "Khi tắt, backend cục bộ hoàn toàn dừng, mọi request chỉ đi qua node con" },
-                { field: "localFallback" as const, label: "Fallback về backend cục bộ", desc: "Khi tắt, kể cả khi tất cả node con ngoại tuyến cũng không gọi backend cục bộ" },
-                { field: "fakeStream" as const, label: "Fake Streaming", desc: "Mô phỏng SSE streaming nếu backend không hỗ trợ" },
-              ].map(({ field, label, desc }) => (
-                <div key={field} className="flex items-center justify-between bg-surface-2/30 border border-border rounded-lg p-3">
-                  <div className="pr-4">
-                    <div className="text-[13px] font-semibold text-text">{label}</div>
-                    <div className="text-[11px] text-text-subtle mt-0.5 leading-relaxed">{desc}</div>
-                  </div>
-                  <button
-                    onClick={() => onToggleRouting(field, !routing[field])}
+                { field: "localEnabled" as const, label: "Backend cục bộ", desc: "Khi tắt, backend cục bộ hoàn toàn dừng, mọi request chỉ đi qua node con.", icon: <Server className="w-3.5 h-3.5" /> },
+                { field: "localFallback" as const, label: "Fallback cục bộ", desc: "Khi tắt, kể cả khi tất cả node con ngoại tuyến cũng không gọi backend cục bộ.", icon: <Zap className="w-3.5 h-3.5" /> },
+                { field: "fakeStream" as const, label: "Fake Streaming", desc: "Mô phỏng SSE streaming nếu backend không hỗ trợ.", icon: <Radio className="w-3.5 h-3.5" /> },
+              ].map(({ field, label, desc, icon }) => {
+                const on = routing[field];
+                return (
+                  <div
+                    key={field}
                     className={cn(
-                      "relative w-10 h-5.5 rounded-full shrink-0 transition-colors border",
-                      routing[field] ? "bg-accent border-accent/50" : "bg-surface-2 border-border-strong"
+                      "rounded-xl border p-3 transition-colors",
+                      on ? "bg-accent/[0.04] border-accent/25" : "bg-bg/40 border-border"
                     )}
                   >
-                    <span className={cn(
-                      "absolute top-[1px] w-4 h-4 bg-white rounded-full transition-all shadow-sm",
-                      routing[field] ? "left-[22px]" : "left-[1px]"
-                    )} />
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                        <div className={cn("w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 mt-0.5", on ? "bg-accent/10 border-accent/30 text-accent" : "bg-surface-2 border-border text-text-subtle")}>
+                          {icon}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-[13px] font-semibold text-text">{label}</span>
+                            <span className={cn(
+                              "text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded border tracking-wider",
+                              on ? "text-success bg-success/10 border-success/30" : "text-text-subtle bg-surface-2 border-border"
+                            )}>
+                              {on ? "ON" : "OFF"}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-text-subtle mt-1 leading-relaxed">{desc}</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => onToggleRouting(field, !on)}
+                        className={cn(
+                          "relative w-11 h-6 rounded-full shrink-0 transition-colors border mt-0.5",
+                          on ? "bg-accent border-accent/50" : "bg-surface-2 border-border-strong"
+                        )}
+                        aria-label={`${label} ${on ? "ON" : "OFF"}`}
+                      >
+                        <span className={cn(
+                          "absolute top-[1px] w-[18px] h-[18px] bg-white rounded-full transition-all shadow-sm",
+                          on ? "left-[24px]" : "left-[1px]"
+                        )} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
 
