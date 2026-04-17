@@ -23,29 +23,29 @@ export default function PageHome({
     <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
       
       {/* 1. Hero Section */}
-      <Card variant="hero" className="text-center py-12 relative overflow-hidden flex flex-col items-center">
+      <Card variant="hero" className="text-center py-10 md:py-12 px-4 sm:px-6 relative overflow-hidden flex flex-col items-center">
         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50" />
-        <h1 className="text-3xl md:text-4xl font-bold font-heading text-text mb-4">
+        <h1 className="text-[26px] leading-tight sm:text-3xl md:text-4xl font-bold font-heading text-text mb-3 md:mb-4 max-w-3xl">
           One endpoint for all your AI models
         </h1>
-        <p className="text-text-muted text-[15px] max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-text-muted text-[14px] sm:text-[15px] max-w-2xl mx-auto mb-7 md:mb-8 leading-relaxed">
           Access OpenAI-compatible and native AI endpoints through a single streamlined gateway.
         </p>
-        
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-          <button onClick={onOpenWizard} className="px-6 py-2.5 bg-accent text-accent-foreground font-semibold rounded-lg text-sm hover:brightness-110 transition-all shadow-[0_0_20px_rgba(20,184,166,0.3)] border border-accent/50 flex items-center gap-2">
+
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-8 md:mb-10 w-full sm:w-auto max-w-sm sm:max-w-none">
+          <button onClick={onOpenWizard} className="px-6 py-3 sm:py-2.5 bg-accent text-accent-foreground font-semibold rounded-lg text-sm hover:brightness-110 transition-all shadow-[0_0_20px_rgba(20,184,166,0.3)] border border-accent/50 flex items-center justify-center gap-2">
             <PlayCircle className="w-4 h-4" /> Bắt đầu cấu hình
           </button>
-          <button onClick={onOpenDocs} className="px-6 py-2.5 bg-surface-2 text-text font-semibold rounded-lg text-sm hover:bg-border-strong transition-colors border border-border flex items-center gap-2">
+          <button onClick={onOpenDocs} className="px-6 py-3 sm:py-2.5 bg-surface-2 text-text font-semibold rounded-lg text-sm hover:bg-border-strong transition-colors border border-border flex items-center justify-center gap-2">
             Xem tài liệu API
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
-          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">Multi-provider</span>
-          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">OpenAI-compatible</span>
-          <span className="text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-3 py-1.5 rounded-full border border-border">Native endpoints</span>
-          <span className="text-[11px] font-semibold text-accent/80 uppercase tracking-wider bg-accent/10 px-3 py-1.5 rounded-full border border-accent/20">Unified access</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4">
+          <span className="text-[10px] sm:text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-border">Multi-provider</span>
+          <span className="text-[10px] sm:text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-border">OpenAI-compatible</span>
+          <span className="text-[10px] sm:text-[11px] font-semibold text-text-subtle uppercase tracking-wider bg-surface-2/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-border">Native endpoints</span>
+          <span className="text-[10px] sm:text-[11px] font-semibold text-accent/80 uppercase tracking-wider bg-accent/10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-accent/20">Unified access</span>
         </div>
       </Card>
 
@@ -238,21 +238,25 @@ export default function PageHome({
           </div>
         </Card>
 
-        <Card variant="compact" className="border-accent/10 flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-surface/50 backdrop-blur-[2px] z-0" />
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent z-0" />
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="text-[10px] uppercase tracking-widest text-text-subtle font-bold mb-2">Tài trợ</div>
-            <h3 className="font-heading font-bold text-lg text-text mb-1">GPTShopVN</h3>
-            <p className="text-[12px] text-text-muted leading-relaxed mb-4 max-w-xs">
+        <div className="relative rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/[0.08] via-surface to-surface overflow-hidden shadow-[0_0_40px_-10px_rgba(20,184,166,0.35)]">
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+          <div className="absolute -top-20 -right-20 w-48 h-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center text-center px-5 sm:px-7 py-7 sm:py-8">
+            <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-accent font-bold mb-3 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              Tài trợ
+            </span>
+            <h3 className="font-heading font-bold text-xl sm:text-2xl text-text mb-2 tracking-tight">GPTShopVN</h3>
+            <p className="text-[13px] sm:text-sm text-text-muted leading-relaxed mb-5 max-w-md">
               Không để chi phí cao thành rào cản sử dụng AI cho người Việt.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 w-full sm:w-auto max-w-xs sm:max-w-none">
               <a
                 href="https://t.me/OdaybanChatGPT_bot"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-1.5 text-[12px] font-semibold text-text bg-surface-2 border border-border rounded-md hover:border-accent/40 hover:text-accent transition-colors"
+                className="px-5 py-2.5 text-[13px] font-semibold text-accent-foreground bg-accent rounded-lg shadow-[0_0_20px_rgba(20,184,166,0.3)] border border-accent/50 hover:brightness-110 transition-all text-center"
               >
                 Telegram Bot
               </a>
@@ -260,13 +264,13 @@ export default function PageHome({
                 href="https://zalo.me/g/a7lgs7lvpw5wnr38ksnh"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-1.5 text-[12px] font-semibold text-text bg-surface-2 border border-border rounded-md hover:border-accent/40 hover:text-accent transition-colors"
+                className="px-5 py-2.5 text-[13px] font-semibold text-text bg-surface-2 border border-border rounded-lg hover:border-accent/40 hover:text-accent transition-colors text-center"
               >
                 Zalo Group
               </a>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
     </div>

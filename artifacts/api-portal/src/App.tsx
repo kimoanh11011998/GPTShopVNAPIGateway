@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Settings } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import SetupWizard from "./components/SetupWizard";
 import PageDocs from "./components/PageDocs";
 import PageLogs from "./components/PageLogs";
@@ -10,7 +10,9 @@ import PageEndpoints from "./components/PageEndpoints";
 import Sidebar, { Tab, TABS } from "./components/Sidebar";
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTabRaw] = useState<Tab>("home");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const setTab = (t: Tab) => { setTabRaw(t); setMobileNavOpen(false); };
   const [online, setOnline] = useState<boolean | null>(null);
   const [sillyTavernMode, setSillyTavernMode] = useState(false);
   const [stLoading, setStLoading] = useState(true);
@@ -241,19 +243,34 @@ export default function App() {
         </div>
       ) : (
         <>
-          <Sidebar tab={tab} setTab={setTab} online={online} baseUrl={baseUrl} apiKey={apiKey} />
-          
-          <main className="flex-1 ml-[240px] max-w-[1200px] w-full px-10 py-10">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-text mb-1 font-heading">{TABS.find(t => t.id === tab)?.label}</h1>
-                <p className="text-sm text-text-subtle m-0">Quản lý và giám sát API Gateway của bạn.</p>
-              </div>
-              <button 
-                onClick={() => setShowWizard(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-surface-2 hover:bg-border-strong text-text font-medium text-xs rounded-lg transition-colors border border-border shadow-[0_0_15px_rgba(0,0,0,0.2)]"
+          <Sidebar
+            tab={tab}
+            setTab={setTab}
+            online={online}
+            baseUrl={baseUrl}
+            apiKey={apiKey}
+            mobileOpen={mobileNavOpen}
+            onCloseMobile={() => setMobileNavOpen(false)}
+          />
+
+          <main className="flex-1 md:ml-[240px] max-w-[1200px] w-full px-4 sm:px-6 md:px-10 py-5 md:py-10">
+            <div className="mb-6 md:mb-8 flex items-center justify-between gap-3">
+              <button
+                onClick={() => setMobileNavOpen(true)}
+                aria-label="Mở menu"
+                className="md:hidden w-10 h-10 shrink-0 rounded-lg flex items-center justify-center text-text bg-surface-2 hover:bg-border-strong border border-border transition-colors"
               >
-                <Settings className="w-3.5 h-3.5" /> Trợ lý cấu hình
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-text mb-1 font-heading truncate">{TABS.find(t => t.id === tab)?.label}</h1>
+                <p className="hidden sm:block text-sm text-text-subtle m-0">Quản lý và giám sát API Gateway của bạn.</p>
+              </div>
+              <button
+                onClick={() => setShowWizard(true)}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-surface-2 hover:bg-border-strong text-text font-medium text-xs rounded-lg transition-colors border border-border shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0"
+              >
+                <Settings className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Trợ lý cấu hình</span>
               </button>
             </div>
 
