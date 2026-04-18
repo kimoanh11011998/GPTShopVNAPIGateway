@@ -15,9 +15,6 @@ export interface ModelEntry {
 
 export const OPENAI_MODELS: ModelEntry[] = [
   { id: "gpt-5.4", label: "GPT-5.4", provider: "openai", desc: "Mô hình thế hệ mới nhất hàng đầu", context: "128K", badge: "tools" },
-  { id: "gpt-5.4-pro", label: "GPT-5.4 Pro", provider: "openai", desc: "Phiên bản Pro nâng cao của GPT-5.4", context: "128K", badge: "tools" },
-  { id: "gpt-5.4-mini", label: "GPT-5.4 Mini", provider: "openai", desc: "Nhanh và tiết kiệm chi phí thế hệ mới", context: "128K", badge: "tools" },
-  { id: "gpt-5.4-nano", label: "GPT-5.4 Nano", provider: "openai", desc: "Mô hình nhẹ siêu nhỏ thế hệ mới", context: "128K", badge: "tools" },
   { id: "gpt-5.2", label: "GPT-5.2", provider: "openai", desc: "Mô hình đa phương tiện hàng đầu mới nhất", context: "128K", badge: "tools" },
   { id: "gpt-5.1", label: "GPT-5.1", provider: "openai", desc: "Mô hình đa phương tiện hàng đầu", context: "128K", badge: "tools" },
   { id: "gpt-5", label: "GPT-5", provider: "openai", desc: "Mô hình đa phương tiện hàng đầu", context: "128K", badge: "tools" },
@@ -47,9 +44,6 @@ export const ANTHROPIC_MODELS: ModelEntry[] = [
   { id: "claude-opus-4-1", label: "Claude Opus 4.1", provider: "anthropic", desc: "Mô hình hàng đầu (ổn định)", context: "200K", badge: "tools" },
   { id: "claude-opus-4-1-thinking", label: "Claude Opus 4.1 (thinking)", provider: "anthropic", desc: "Suy nghĩ mở rộng (ẩn)", context: "200K", badge: "thinking" },
   { id: "claude-opus-4-1-thinking-visible", label: "Claude Opus 4.1 (thinking visible)", provider: "anthropic", desc: "Suy nghĩ mở rộng (hiển thị)", context: "200K", badge: "thinking-visible" },
-  { id: "claude-sonnet-4-7", label: "Claude Sonnet 4.7", provider: "anthropic", desc: "Mới nhất — cân bằng đỉnh cao tốc độ & thông minh", context: "200K", badge: "tools" },
-  { id: "claude-sonnet-4-7-thinking", label: "Claude Sonnet 4.7 (thinking)", provider: "anthropic", desc: "Suy nghĩ mở rộng (ẩn)", context: "200K", badge: "thinking" },
-  { id: "claude-sonnet-4-7-thinking-visible", label: "Claude Sonnet 4.7 (thinking visible)", provider: "anthropic", desc: "Suy nghĩ mở rộng (hiển thị)", context: "200K", badge: "thinking-visible" },
   { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", provider: "anthropic", desc: "Cân bằng tốt nhất tốc độ và thông minh", context: "200K", badge: "tools" },
   { id: "claude-sonnet-4-6-thinking", label: "Claude Sonnet 4.6 (thinking)", provider: "anthropic", desc: "Suy nghĩ mở rộng (ẩn)", context: "200K", badge: "thinking" },
   { id: "claude-sonnet-4-6-thinking-visible", label: "Claude Sonnet 4.6 (thinking visible)", provider: "anthropic", desc: "Suy nghĩ mở rộng (hiển thị)", context: "200K", badge: "thinking-visible" },
@@ -94,9 +88,6 @@ export const OPENROUTER_MODELS: ModelEntry[] = [
 
 export const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   "gpt-5.4": { input: 2.5, output: 10 },
-  "gpt-5.4-pro": { input: 5, output: 20 },
-  "gpt-5.4-mini": { input: 0.15, output: 0.6 },
-  "gpt-5.4-nano": { input: 0.075, output: 0.3 },
   "gpt-5.2": { input: 2.5, output: 10 },
   "gpt-5.1": { input: 2.5, output: 10 },
   "gpt-5": { input: 2.5, output: 10 },
@@ -120,7 +111,6 @@ export const MODEL_PRICING: Record<string, { input: number; output: number }> = 
   "claude-opus-4-6": { input: 15, output: 75 },
   "claude-opus-4-5": { input: 15, output: 75 },
   "claude-opus-4-1": { input: 15, output: 75 },
-  "claude-sonnet-4-7": { input: 3, output: 15 },
   "claude-sonnet-4-6": { input: 3, output: 15 },
   "claude-sonnet-4-5": { input: 3, output: 15 },
   "claude-haiku-4-5": { input: 0.8, output: 4 },

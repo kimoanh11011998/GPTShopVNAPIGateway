@@ -11,8 +11,12 @@ const router: IRouter = Router();
 // Models
 // ---------------------------------------------------------------------------
 
+// NOTE: gpt-5.4-pro / gpt-5.4-mini / gpt-5.4-nano were probed and the upstream
+// returned HTTP 404 ("deployment does not exist"). They are excluded from the
+// public catalog until the integration proxy adds those deployments. gpt-5.4
+// (base) is supported.
 const OPENAI_CHAT_MODELS = [
-  "gpt-5.4", "gpt-5.4-pro", "gpt-5.4-mini", "gpt-5.4-nano",
+  "gpt-5.4",
   "gpt-5.2", "gpt-5.1", "gpt-5", "gpt-5-mini", "gpt-5-nano",
   "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano",
   "gpt-4o", "gpt-4o-mini",
@@ -22,9 +26,12 @@ const OPENAI_THINKING_ALIASES = OPENAI_CHAT_MODELS
   .filter((m) => m.startsWith("o"))
   .map((m) => `${m}-thinking`);
 
+// NOTE: claude-sonnet-4-7 was probed and upstream returned UNSUPPORTED_MODEL.
+// It is excluded from the public catalog until Anthropic releases that model id.
+// claude-opus-4-7 IS supported by upstream.
 const ANTHROPIC_BASE_MODELS = [
   "claude-opus-4-7", "claude-opus-4-6", "claude-opus-4-5", "claude-opus-4-1",
-  "claude-sonnet-4-7", "claude-sonnet-4-6", "claude-sonnet-4-5",
+  "claude-sonnet-4-6", "claude-sonnet-4-5",
   "claude-haiku-4-5",
 ];
 
@@ -812,7 +819,6 @@ router.post("/v1/chat/completions", requireApiKey, async (req: Request, res: Res
           "claude-haiku-4-5": 8096,
           "claude-sonnet-4-5": 64000,
           "claude-sonnet-4-6": 64000,
-          "claude-sonnet-4-7": 64000,
           "claude-opus-4-1": 32000, // upstream caps thinking output at 32k for opus-4-1
           "claude-opus-4-5": 64000,
           "claude-opus-4-6": 64000,
