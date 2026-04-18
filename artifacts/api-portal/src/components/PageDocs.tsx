@@ -21,7 +21,7 @@ Tính năng chính:
     content: `Cổng tự động xác định nhà cung cấp đích dựa vào tên mô hình trong request:
 
 Mô hình OpenAI: gpt-5.2, gpt-5.1, gpt-5, gpt-4.1, gpt-4o, o3, o4-mini, v.v.
-Mô hình Anthropic: claude-opus-4-7, claude-opus-4-6, claude-opus-4-5, claude-opus-4-1, claude-sonnet-4-6, claude-sonnet-4-5, claude-haiku-4-5 (mỗi base có thêm bí danh -thinking và -thinking-visible, trừ opus-4-7).
+Mô hình Anthropic: claude-opus-4-7, claude-opus-4-6, claude-opus-4-5, claude-opus-4-1, claude-sonnet-4-7, claude-sonnet-4-6, claude-sonnet-4-5, claude-haiku-4-5 (mỗi base có thêm bí danh -thinking và -thinking-visible, trừ opus-4-7).
 Mô hình Gemini: gemini-3.1-pro, gemini-2.5-flash, v.v.
 Mô hình OpenRouter: tên mô hình chứa "/" (vd: openai/gpt-4o) hoặc các mô hình bên thứ ba đã đăng ký
 

@@ -24,7 +24,7 @@ const OPENAI_THINKING_ALIASES = OPENAI_CHAT_MODELS
 
 const ANTHROPIC_BASE_MODELS = [
   "claude-opus-4-7", "claude-opus-4-6", "claude-opus-4-5", "claude-opus-4-1",
-  "claude-sonnet-4-6", "claude-sonnet-4-5",
+  "claude-sonnet-4-7", "claude-sonnet-4-6", "claude-sonnet-4-5",
   "claude-haiku-4-5",
 ];
 
@@ -763,8 +763,19 @@ router.post("/v1/chat/completions", requireApiKey, async (req: Request, res: Res
     return;
   }
 
-  const selectedModel = model && ALL_MODELS.some((m) => m.id === model) ? model : "gpt-5.2";
-  const provider = MODEL_PROVIDER_MAP.get(selectedModel) ?? "openai";
+  // Resolve provider from the known map first, then fallback by prefix heuristic.
+  // Never silently swap the user's chosen model to a different model.
+  const knownProvider = model ? MODEL_PROVIDER_MAP.get(model) : undefined;
+  const heuristicProvider: typeof knownProvider = !knownProvider && model
+    ? model.startsWith("claude-") ? "anthropic"
+      : model.startsWith("gemini-") ? "gemini"
+      : model.includes("/") ? "openrouter"
+      : undefined
+    : undefined;
+  const resolvedProvider = knownProvider ?? heuristicProvider;
+
+  const selectedModel = model && (resolvedProvider || ALL_MODELS.some((m) => m.id === model)) ? model : "gpt-5.2";
+  const provider = resolvedProvider ?? MODEL_PROVIDER_MAP.get(selectedModel) ?? "openai";
   const isClaudeModel = provider === "anthropic";
   const isGeminiModel = provider === "gemini";
   const isOpenRouterModel = provider === "openrouter";
@@ -801,6 +812,7 @@ router.post("/v1/chat/completions", requireApiKey, async (req: Request, res: Res
           "claude-haiku-4-5": 8096,
           "claude-sonnet-4-5": 64000,
           "claude-sonnet-4-6": 64000,
+          "claude-sonnet-4-7": 64000,
           "claude-opus-4-1": 32000, // upstream caps thinking output at 32k for opus-4-1
           "claude-opus-4-5": 64000,
           "claude-opus-4-6": 64000,
