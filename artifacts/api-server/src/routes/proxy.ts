@@ -832,7 +832,7 @@ router.post("/v1/chat/completions", requireApiKey, async (req: Request, res: Res
           ? Math.min(Math.max(modelMax, THINKING_OUTPUT_CAP), THINKING_OUTPUT_CAP)
           : modelMax;
         const client = makeLocalAnthropic();
-        result = await handleClaude({ req, res, client, model: actualModel, messages: finalMessages, stream: shouldStream, maxTokens: max_tokens ?? defaultMaxTokens, thinking: thinkingEnabled, tools, toolChoice: tool_choice, startTime });
+        result = await handleClaude({ req, res, client, model: actualModel, messages: finalMessages, stream: shouldStream, maxTokens: max_tokens ?? defaultMaxTokens, thinking: thinkingEnabled, exposeThinking: thinkingVisible, tools, toolChoice: tool_choice, startTime });
       } else if (isGeminiModel) {
         const thinkingVisible = selectedModel.endsWith("-thinking-visible");
         const thinkingEnabled = thinkingVisible || selectedModel.endsWith("-thinking");
@@ -1729,7 +1729,7 @@ async function handleGeminiNative({
 }
 
 async function handleClaude({
-  req, res, client, model, messages, stream, maxTokens, thinking = false, tools, toolChoice, startTime,
+  req, res, client, model, messages, stream, maxTokens, thinking = false, exposeThinking = false, tools, toolChoice, startTime,
 }: {
   req: Request;
   res: Response;
@@ -1739,6 +1739,14 @@ async function handleClaude({
   stream: boolean;
   maxTokens: number;
   thinking?: boolean;
+  /**
+   * If true (alias `*-thinking-visible`), the chain-of-thought returned by
+   * Anthropic is wrapped into <thinking>...</thinking> blocks in the chat
+   * completion content. If false (alias `*-thinking`, the default), thinking
+   * is still ENABLED upstream (so Claude reasons internally) but the thinking
+   * content is stripped from the visible response.
+   */
+  exposeThinking?: boolean;
   tools?: OAITool[];
   toolChoice?: unknown;
   startTime: number;
@@ -1815,11 +1823,15 @@ async function handleClaude({
           if (block.type === "thinking") {
             if (!thinkingStarted) {
               thinkingStarted = true;
-              writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "<thinking>\n" }, finish_reason: null }] })}\n\n`);
+              if (exposeThinking) {
+                writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "<thinking>\n" }, finish_reason: null }] })}\n\n`);
+              }
             }
           } else if (block.type === "tool_use") {
             if (thinkingStarted) {
-              writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "\n</thinking>\n\n" }, finish_reason: null }] })}\n\n`);
+              if (exposeThinking) {
+                writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "\n</thinking>\n\n" }, finish_reason: null }] })}\n\n`);
+              }
               thinkingStarted = false;
             }
             // Map this content block index to tool_calls array index
@@ -1830,7 +1842,9 @@ async function handleClaude({
             writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { tool_calls: [{ index: currentToolIndex, id: block.id, type: "function", function: { name: block.name, arguments: "" } }] }, finish_reason: null }] })}\n\n`);
           } else if (block.type === "text") {
             if (thinkingStarted) {
-              writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "\n</thinking>\n\n" }, finish_reason: null }] })}\n\n`);
+              if (exposeThinking) {
+                writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: "\n</thinking>\n\n" }, finish_reason: null }] })}\n\n`);
+              }
               thinkingStarted = false;
             }
           }
@@ -1839,8 +1853,13 @@ async function handleClaude({
           const delta = event.delta;
 
           if (delta.type === "thinking_delta") {
-            const cleaned = delta.thinking.replace(/<\/?think>/g, "");
-            if (cleaned) writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: cleaned }, finish_reason: null }] })}\n\n`);
+            if (exposeThinking) {
+              const cleaned = delta.thinking.replace(/<\/?think>/g, "");
+              if (cleaned) writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: cleaned }, finish_reason: null }] })}\n\n`);
+            }
+            // When exposeThinking=false, thinking is still ENABLED upstream
+            // (Claude reasons internally) — we just drop the chain-of-thought
+            // chunks from the visible output stream.
           } else if (delta.type === "text_delta") {
             if (ttftMs === undefined) ttftMs = Date.now() - startTime;
             writeAndFlush(res, `data: ${JSON.stringify({ id: msgId, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model, choices: [{ index: 0, delta: { content: delta.text }, finish_reason: null }] })}\n\n`);
@@ -1888,8 +1907,11 @@ async function handleClaude({
 
     for (const block of result.content) {
       if (block.type === "thinking") {
-        const rawThinking = (block as { type: "thinking"; thinking: string }).thinking.replace(/<\/?think>/g, "");
-        textParts.push(`<thinking>\n${rawThinking}\n</thinking>`);
+        if (exposeThinking) {
+          const rawThinking = (block as { type: "thinking"; thinking: string }).thinking.replace(/<\/?think>/g, "");
+          textParts.push(`<thinking>\n${rawThinking}\n</thinking>`);
+        }
+        // exposeThinking=false: thinking ran upstream but content is hidden.
       } else if (block.type === "text") {
         textParts.push((block as { type: "text"; text: string }).text);
       } else if (block.type === "tool_use") {
